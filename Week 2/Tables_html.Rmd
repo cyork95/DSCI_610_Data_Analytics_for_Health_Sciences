@@ -1,0 +1,83 @@
+---
+title: "Descriptive Summary Statistics Tables"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## HTML document for summary statistics tables
+
+Load required packages.
+
+```{r}
+library(NHANES)
+library(tidyverse)
+library(kableExtra)
+#as_tibble(NHANES)
+```
+
+### Create the analysis dataset
+
+```{r}
+df_eda <- select(NHANES, ID, SurveyYr, Gender, Age, Race1, Poverty, HomeOwn, Weight, Height, BMI, BPSysAve, BPDiaAve, TotChol, Diabetes, SmokeNow)
+#df_eda
+```
+
+
+\vspace{.15in}
+
+### Example 1
+
+```{r}
+# Step 1 : construct the data frame
+
+dftbl <- df_eda %>%
+  filter(!is.na(TotChol)) %>%
+  group_by(Race1, Gender) %>%
+  summarise(mean = mean(TotChol),
+            stdev = sd(TotChol),
+            N = n()) %>%
+  ungroup() %>%
+
+  pivot_wider(names_from = Gender, values_from = c(mean, stdev, N)) %>%
+  select(Race1, ends_with("female"), everything())
+
+# Step 2 : construct the table
+
+kable(dftbl, caption = "Descriptive Statistics", booktabs = TRUE,
+      escape = F,
+      digits = 3,
+      longtable = T,
+      col.names = c("Race", "Mean", "St. deviation", "N", "Mean", "St. deviation", "N")) %>%
+  add_header_above(c(" " = 1, "Women" = 3, "Men" = 3))
+```
+
+\vspace{.15in}
+
+### Example 2
+
+```{r}
+# Step 1 : construct the data frame
+dftbl <- df_eda %>%
+  filter(!is.na(BPSysAve)) %>%
+  group_by(Race1, Gender) %>%
+  summarise(median = median(BPSysAve),
+            pct_75 = quantile(BPSysAve, prob = 0.75),
+            pct_25 = quantile(BPSysAve, prob = 0.25),
+            N = n()) %>%
+  ungroup() %>%
+
+  pivot_wider(names_from = Gender, values_from = c(median, pct_75, pct_25, N)) %>%
+  select(Race1, ends_with("female"), everything())
+
+# Step 2 : construct the table
+
+kable(dftbl, caption = "Descriptive Statistics", booktabs = TRUE,
+      escape = F,
+      digits = 3,
+      longtable = T,
+      col.names = c("Race", "Median", "75th Pct.", "25th Pct.", "N", "Median", "75th Pct.", "25th Pct.", "N")) %>%
+  add_header_above(c(" " = 1, "Women" = 4, "Men" = 4))
+```

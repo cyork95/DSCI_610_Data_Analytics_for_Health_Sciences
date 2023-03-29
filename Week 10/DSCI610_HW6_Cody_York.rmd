@@ -1,0 +1,85 @@
+---
+title: "DSCI610_HW6_Cody_York"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(readr)
+library(VGAM)
+
+df_child19 <- read_csv("Week 10/child19.csv")
+
+df_child19_select_fields <- select(df_child19, INCGRP_C, RACEALLP_C, SDQPEER_C, SDQHYPE_C, SDQCOND_C, YRSINUS_C,
+                                   PCNTADTWKP_C, SCFAMSTR_C, PARSEX1_C, RACPARSC_C, PARAGETC1_C, PARAGETC2_C, MARSTAT1_C,
+                                   MARSTAT2_C, JAILEV_C, MENTDEPEV_C, FDSNOTEAT_C, BEHDFCNTR_C, ASDEV_C, OVER65FLG_C)
+df_child19_select_fields_cleaned <- df_child19_select_fields %>% filter(!is.na(ASDEV_C) &
+                                                                          !is.na(BEHDFCNTR_C) &
+                                                                          !is.na(MENTDEPEV_C) &
+                                                                          !is.na(JAILEV_C))
+View(df_child19_select_fields)
+
+```
+
+# 1
+The two binary responses I will be looking at are "Difficulty Controlling Behavior" and "Whether they have ever had autism".
+
+For this first model I will check if having a parent in jail has an effect on "Difficulty Controlling Behavior".
+For the second model I will check if having a parent with a mental illness has an effect on "Difficulty Controlling Behavior".
+
+For this first model I will check if having a parent in jail has an effect on "a child having autism".
+For the second model I will check if having a parent with a mental illness has an effect on "a child having autism".
+```{r}
+lm_beh_jail <- glm(JAILEV_C ~ BEHDFCNTR_C, family = binomial, data = df_child19_select_fields)
+summary(lm_beh_jail)
+
+lm_beh_ment <- glm(MENTDEPEV_C ~ BEHDFCNTR_C, family = binomial, data = df_child19_select_fields)
+summary(lm_beh_ment)
+
+lm_aut_jail <- glm(JAILEV_C ~ ASDEV_C, family = binomial, data = df_child19_select_fields)
+summary(lm_aut_jail)
+
+lm_aut_ment <- glm(MENTDEPEV_C ~ ASDEV_C, family = binomial, data = df_child19_select_fields)
+summary(lm_aut_ment)
+
+```
+
+# 2.
+
+The baseline category I will be looking at is "Income Group" .
+
+```{r}
+hometab <- ftable(xtabs(~INCGRP_C + RACEALLP_C + MARSTAT1_C + MARSTAT2_C, data = df_child19_select_fields))
+ht <- as.data.frame(hometab)
+
+w <- pivot_wider(ht, names_from = INCGRP_C, values_from = Freq)
+#w
+col_order <- c("RACEALLP_C", "MARSTAT1_C", "MARSTAT2_C", "Group1", "Group3", "Group5")
+w2 <- w[, col_order]
+w2
+
+fit1 <- vglm(formula = cbind(Group1, Group3, Group5) ~ factor(RACEALLP_C) +
+  factor(MARSTAT1_C) +
+  factor(MARSTAT2_C),
+             family = multinomial, data = w2)
+summary(fit1)
+```
+
+# 3
+
+This proportional odds model is for  "Difficulty Controlling Behavior".
+
+```{r}
+dptab <- ftable(xtabs(~INCGRP_C + RACEALLP_C + BEHDFCNTR_C, data = df_child19_select_fields))
+dt1 <- as.data.frame(dptab)
+#dt1
+w1 <- pivot_wider(dt1, names_from = BEHDFCNTR_C, values_from = Freq)
+#w1
+col_order <- c("IncomeGroup", "Race", "Most", "Several", "None")
+w3 <- w1[, col_order]
+w3
+
+fit2 <- vglm(formula = cbind(Most, Several, None) ~ factor(INCGRP_C) + factor(RACEALLP_C),
+             family = cumulative(parallel = TRUE), data = w3)
+summary(fit2)
+```

@@ -1,0 +1,91 @@
+---
+title: "DSCI_610_HW5_Cody_York_R_Code"
+output: html_notebook
+---
+
+```{r}
+setwd('/Users/cy_su/PycharmProjects/DSCI610_Data_Analytics_for_Health_Sciences')
+
+
+library(tidyverse)
+library(epitools)
+
+random_study <- read.csv('Week 7/randomized_study.csv')
+multi_center_randomized_study <- read.csv('Week 7/multi-center_randomized_trial.csv')
+one_center <- read.csv('Week 7/one_center.csv')
+clearing_proteins <- read.csv('Week 7/clearing_proteins.csv')
+skin_disorder <- read.csv('Week 7/skin_disorder.csv')
+```
+
+Creating the Contingency Table and Percentages
+```{r}
+cross1 <- table(random_study$group, random_study$outcome)
+addmargins(cross1)
+
+round(prop.table(cross1, 2), digits = 3)
+
+```
+
+Creating the Confidence Intervals
+```{r}
+riskratio.wald(cross1)
+```
+
+```{r}
+prop.test(74, 160, p = .1, correct = FALSE)
+```
+
+
+Conduct an Odds Ratio Test
+```{r}
+oddsratio.wald(cross1)
+```
+Create a odds-ratio for favorable response
+
+```{r}
+cross2 <- table(multi_center_randomized_study$Dosage, multi_center_randomized_study$Outcome)
+addmargins(cross2)
+
+round(prop.table(cross2, 2), digits = 3)
+
+oddsratio.wald(cross2)
+```
+Create a 95% confidence interval
+
+```{r}
+cross3 <- table(one_center$Dosage, one_center$Outcome)
+addmargins(cross3)
+
+round(prop.table(cross3, 2), digits = 3)
+
+oddsratio.wald(cross3)
+```
+
+Apply Binomial formula to the data
+```{r}
+prop.test(10, 16, p = 0.05, correct = FALSE)
+```
+
+```{r}
+cross4 <- table(clearing_proteins$group, clearing_proteins$outcome)
+addmargins(cross4)
+
+round(prop.table(cross4, 2), digits = 3)
+
+oddsratio.wald(cross4)
+
+
+```
+
+Skin Disorder
+```{r}
+cross5 <- table(skin_disorder$Dose, skin_disorder$Response)
+addmargins(cross5)
+
+round(prop.table(cross4, 2), digits = 3)
+
+oddsratio.wald(cross5)
+```
+```{r}
+chisq.test(table(skin_disorder$Response), p = c(.2, .2, .36, .24))
+```

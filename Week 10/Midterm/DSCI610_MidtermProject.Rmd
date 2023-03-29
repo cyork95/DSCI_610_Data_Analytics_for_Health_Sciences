@@ -1,0 +1,541 @@
+---
+title: "DSCI610_MidtermProject"
+author: "Sean Groves"
+date: "2023-03-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r global-options, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+## Midterm Project
+
+### 1
+
+There are three datasets that will be looked at in the following survey. They are: "*Provisional COVID-19 Deaths by Sex. Age, and State*". "*Provisional COVID-19 Deaths by Sex, Age, and Week*", and "*Provisional COVID-19 Deaths by Conditions*".
+
+*Provisional COVID-19 Deaths by Sex. Age, and State* is a Centers for Disease Control and Prevention (CDC) is a dataset that is publicly available from the website: https://data.cdc.gov/NCHS/Provisional-COVID-19-Deaths-by-Sex-and-Age/9bhg-hcku . This dataset contains data on deaths related to coronavirus disease 2019 (Covid-19), pneumonia, and influenza reported to National Center for Health Statistics (NCHS) the creator of the dataset. This dataset contains 121k rows across 16 columns.
+
+The columns in this data set are as follows:
+
+    1. Data As Of
+        + Date of analysis, Datetime
+    2. Start Date
+      + First date of data period, Datetime
+    3. End Date
+      + last Date of data period, Datetime
+    4. Group
+      + Indicator of whether data is measured by Month, Year or Total, String
+    5. Year
+      + Year in which the death occurred, Numeric
+    6. Month 
+      + Month in which death occurred, Numeric
+    7. State 
+      + Jurisdiction of occurrence, String
+    8. Sex 
+      + Gender, String
+    9. Age Group
+      + Age buckets, String
+    10. COVID-19 Deaths
+      + Deaths from Covid-19, Numeric
+    11. Total Deaths
+      + Deaths from all causes, Numeric
+    12. Pneumonia Deaths
+      + Pneumonia deaths, Numeric
+    13. Pneumonia and COVID-19 Deaths
+      + Total of deaths from Pneumonia and Covid-19, Numeric
+    14. Influenza Deaths
+      + Deaths from Influenza, Numeric
+    15. Pneumonia, Influenza or COVID-19 Deaths
+      + Deaths from Pneumonia, Influenza, COVID-19, Numeric
+    16. Footnote
+      + Suppressed counts, String
+
+
+"*Provisional COVID-19 Deaths by Sex, Age, and Week*" is a dataset from the CDC created by NCHS that contains data based on deaths involving COVID-19 as reported to NCHS by sex, age group and the week ending date. This dataset is publically available from the CDC website: https://data.cdc.gov/NCHS/Provisional-COVID-19-Deaths-by-Week-Sex-and-Age/vsak-wrfu . This dataset has 6,012 rows across 8 columns.
+
+The columns in this dataset are as follows:
+
+    1. Data As Of
+        + Date of analysis, Datetime
+    2. State 
+        + Jurisdiction of occurrence, String 
+    3. MMWR Week
+        + Morbidity and Mortality Weekly Report (MMWR) week number, Numeric 
+    4. End Week
+        + last week ending date of data period, Datetime
+    5. Sex 
+        + Gender, String
+    6. Age Group
+        + Age buckets, String
+    7. Total Deaths
+        + Deaths from all causes, Numeric
+    8. COVID-19 Deaths
+        + Deaths from Covid-19, Numeric
+
+*Provisional COVID-19 Deaths by Conditions* is also a dataset from CDC prepared by NCHS that contains health conditions and contributing causes mentioned in conjunction with Covid-19 Deaths by age group and location. This data is publicly available at the website:  https://data.cdc.gov/NCHS/Conditions-Contributing-to-COVID-19-Deaths-by-Stat/hk9y-quqm . This dataset has 546k rows across 14 columns.
+
+The columns in this dataset are as follows:
+
+     1. Data As Of
+        + Date of analysis, Datetime
+     2. Start Date
+        + First week starting date of data period, Datetime 
+     3. End Date
+        + Last week ending date of data period, Datetime
+     4. Group
+        + Time-period indicator for record by Month, Year, and Total, String
+     5. Year
+        + Year in which death happened, Numeric
+     6.  Month
+        + Month in which death happened, Numeric
+     7. State
+        + place of death, String
+     8. Condition Group
+        + condition buckets, String
+     9. Condition
+        + condition contributing to Covid-19 deaths, String
+     10. ICD10_codes
+        + International Statistical Classification of Diseases and Related Health Problems (ICD-10) for conditions, String
+     11. Age Group
+        + age buckets, String
+     12. COVID-19 Deaths
+        + Deaths from Covid-19, Numeric
+     13. Number of Mentions
+        + number of mentions, Numeric
+     14. Flag
+        + counts <10 suppressed, String
+
+**The below Survey will:**
+
+      1. Answer and graph the question  “How do COVID-19 deaths compare with deaths from Pneumonia and Influenza nationwide across Sex and Age groups?”
+      2. Explore, compare, and graph trends in deaths from COVID-19 over weeks for all sexes.
+      3. Explore and determine if there is a particular age group that is most susceptible to die from COVID-19.
+      4. Explore and make conclusions regarding respiratory and circulatory diseases for both respiratory and circulatory diseases.
+
+**Below is a more detailed approach on how the survey will achieve the above goals.**
+
+In the following survey, we will be cleaning the above *Provisional COVID-19 Deaths by Sex. Age, and State* dataset and filtering on Group = "By Total" and State = "United States". There will also be explanations following the code to describe the data and what is being discovered. We will then filter on age groups and the different causes of death (covid_19, influenza, and pneumonia) for Cause of Death based on Sex, and Cause of Death based on Age Groups and create bar graph visualizations. We will also create Kable charts to compare these death counts across age and sex. The states California, Florida, New York, and Texas Will be examined based on the deaths from Covid-19 against total deaths at the time.
+
+Next in the study, we will focus on the *Provisional COVID-19 Deaths by Sex, Age, and Week* dataset. This dataset will be filtered by age group and dates will be cleaned. There will be two visualizations created, one line graph for Covid-19 Deaths by Week by Sex and another line graph for Total Deaths by week by Sex. Explanations will follow the graphs.
+
+Then, the survey will use the *Provisional COVID-19 Deaths by Conditions* dataset. This dataset will then be filtered on Group = "By total" and State = "United States''. Next there will be another filter this time on Age group = "All Ages". This filtered data will then be grouped by condition group and a new column will be created which is the sum of the covid-19 deaths by condition group. This will be stored as a separate dataset. After this cleanup and preprocessing is done we will create a kable table containing the Covid-19 deaths based on the condition groups. There will also be a bar chart visualization created of the same as the kaggle chart to compare.
+
+Another dataset will be created from the cleaned up data. This dataset will filter on the age where it is not "Not stated" or "All Ages”  to get only the bucketed ages. Then the data will be filtered on group = "By Total '' and state = "United States". Using this new age dataset a kable table of Covid-19 deaths by Age Group will be created and like before a following bar chart visualization will be created of the same. Explanations will follow the graph.
+
+Then the survey will create a few more datasets. A California dataset that filters the data on group = "By total" and state = "California", a New York dataset that filters the data on group = "By total" and state = "New York'', a combined dataset including both details from each state and finally a combined state dataset that is filtering on respiratory conditions and taking all ages. A new field will then be added that gives the total deaths among both states and a field that gives the ratio of deaths between California versus New York. A kable table will then be created based on this data and following the table a bar graph showing the data will be created as well. Following this a writeup of the data will be included.
+
+
+
+
+### 2
+```{r}
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(kableExtra)
+library(stringr)
+library(tidyverse)
+library(tibble)
+covid_state <- read.csv("Provisional_COVID-19_Deaths_by_Sex_and_Age.csv")
+covid_state_clean <- covid_state %>%
+  select(-c(End.Date, Start.Date, Year, Month))
+
+natl <- covid_state_clean %>%
+  filter(Group == "By Total" & State == "United States")
+
+# #bar chart with totals only
+# all_natl <- natl %>%
+#   filter(Sex =="All Sexes" & Age.Group =="All Ages") %>%
+#   select(c(COVID.19.Deaths,Pneumonia.Deaths,Influenza.Deaths)) %>%
+#   pivot_longer(cols = c("COVID.19.Deaths","Pneumonia.Deaths","Influenza.Deaths"), names_to = "Death_Cause", values_to = "Count")
+# 
+# ggplot(all_natl, aes(x=Death_Cause, y=Count))+
+#   geom_bar(stat="identity")
+
+#Facet Bar plot with age and sex
+grouped_natl <- natl %>%
+  filter(Sex != "All Sexes" & (Age.Group == "0-17 years" |
+    Age.Group == "18-29 years" |
+    Age.Group == "30-39 years"
+    |
+    Age.Group == "40-49 years" |
+    Age.Group == "50-64 years" |
+    Age.Group == "65-74 years"
+    |
+    Age.Group == "75-84 years" |
+    Age.Group == "85 years and over")) %>%
+  pivot_longer(cols = c("COVID.19.Deaths", "Pneumonia.Deaths", "Influenza.Deaths"), names_to = "Death_Cause", values_to = "Count") %>%
+  mutate(Death_Cause = replace(Death_Cause, Death_Cause == "COVID.19.Deaths", "Covid")) %>%
+  mutate(Death_Cause = replace(Death_Cause, Death_Cause == "Pneumonia.Deaths", "Pneumonia")) %>%
+  mutate(Death_Cause = replace(Death_Cause, Death_Cause == "Influenza.Deaths", "Flu")) %>%
+  mutate(Age.Group = replace(Age.Group, Age.Group == "0-17 years", "< 18")) %>%
+  mutate(Age.Group = replace(Age.Group, Age.Group == "18-29 years", "18-29")) %>%
+  mutate(Age.Group = replace(Age.Group, Age.Group == "30-39 years", "30-39")) %>%
+  mutate(Age.Group = replace(Age.Group, Age.Group == "40-49 years", "40-49")) %>%
+  mutate(Age.Group = replace(Age.Group, Age.Group == "50-64 years", "50-64")) %>%
+  mutate(Age.Group = replace(Age.Group, Age.Group == "65-74 years", "65-74")) %>%
+  mutate(Age.Group = replace(Age.Group, Age.Group == "75-84 years", "75-84")) %>%
+  mutate(Age.Group = replace(Age.Group, Age.Group == "85 years and over", "> 84"))#%>%
+#mutate(Age.Group=factor(Age, levels = c("< 18","18-29","30-39","40-49","50-64","65-74","75-84","> 84")))
+
+
+ggplot(grouped_natl, aes(x = Death_Cause, y = Count, fill = Sex)) +
+  geom_col() +
+  scale_y_continuous("Deaths (Millions)", labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 6) +
+  xlab("Cause of Death") +
+  ggtitle("Cause of Death by Sex")
+
+
+ggplot(grouped_natl, aes(x = Death_Cause, y = Count, fill = factor(Age.Group, levels = c("< 18", "18-29", "30-39", "40-49", "50-64", "65-74", "75-84", "> 84")))) +
+  geom_col() +
+  labs(fill = "Age Group", x = "Cause of Death", title = "Cause of Death in Age Groups") +
+  scale_y_continuous("Deaths (Millions)", labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 6)
+
+
+
+ggplot(grouped_natl, aes(x = Death_Cause, y = Count, fill = Sex)) +
+  geom_col() +
+  facet_grid(. ~ factor(Age.Group, levels = c("< 18", "18-29", "30-39", "40-49", "50-64", "65-74", "75-84", "> 84"))) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  theme(legend.key.size = unit(.2, 'cm')) +
+  scale_y_continuous("Count in Thousands", labels = unit_format(unit = "K", scale = 1e-3)) +
+  xlab("Cause of Death") +
+  ggtitle("Cause of Death in Age Groups by Sex")
+
+
+
+#Sex Kable
+
+
+test <- grouped_natl %>%
+  select(Sex, Death_Cause, Count) %>%
+  group_by(Sex, Death_Cause) %>%
+  summarise(N = sum(Count)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = Sex, values_from = N) %>%
+  add_row(Death_Cause = "Total", summarise(., across(where(is.numeric), sum))) %>%
+  mutate(Totals = rowSums(.[2:3])) %>%
+  mutate(Male.Death.Perc = (Male / Female) * 100)
+
+
+kable(test, caption = "Cause of Deaths in Males and Females", booktabs = TRUE,
+      escape = F,
+      digits = 1,
+      longtable = T,
+      col.names = c("Cause of Death", "Count", "Count", "Count", "Male Death %"),
+      format.args = list(big.mark = ",")) %>%
+  add_header_above(c(" " = 1, "Female" = 1, "Male" = 1, "Totals" = 1, " " = 1)) %>%
+  kable_styling(latex_options = "striped", full_width = FALSE) %>%
+  column_spec(4, bold = TRUE) %>%
+  column_spec(5, bold = TRUE) %>%
+  row_spec(4, bold = TRUE)
+
+
+#Age Kable
+test2 <- grouped_natl %>%
+  select(Age.Group, Death_Cause, Count) %>%
+  group_by(Age.Group, Death_Cause) %>%
+  summarise(N = sum(Count)) %>%
+  ungroup() %>%
+  pivot_wider(names_from = Age.Group, values_from = N) %>%
+  add_row(Death_Cause = "Total", summarise(., across(where(is.numeric), sum))) %>%
+  # bind_rows(summarise_all(., ~if(is.numeric(.)) sum(.) else "Total")) %>%
+  mutate(Totals = rowSums(.[2:9])) %>%
+  select('Death_Cause', '< 18', '18-29':'75-84', '> 84', 'Totals')
+
+kable(test2, caption = "Cause of Deaths in Age Groups", booktabs = TRUE,
+      escape = F,
+      digits = 1,
+      longtable = T,
+      col.names = c("Cause of Death", "< 18", "18-29", "30-39", "40-49", "50-64", "65-74", "75-84", "> 84", "Totals"),
+      format.args = list(big.mark = ",")) %>%
+  add_header_above(c(" " = 1, "Age Group" = 8, " " = 1)) %>%
+  kable_styling(latex_options = "striped", full_width = FALSE) %>%
+  column_spec(10, bold = TRUE) %>%
+  row_spec(4, bold = TRUE)
+
+
+
+
+#### 4 states
+cali <- covid_state_clean %>%
+  filter(Group == "By Total" &
+           State == "California" &
+           Sex == "All Sexes" &
+           Age.Group == "All Ages") %>%
+  select(State, COVID.19.Deaths, Total.Deaths)
+
+nY <- covid_state_clean %>%
+  filter(Group == "By Total" &
+           State == "New York" &
+           Sex == "All Sexes" &
+           Age.Group == "All Ages") %>%
+  select(State, COVID.19.Deaths, Total.Deaths)
+
+tex <- covid_state_clean %>%
+  filter(Group == "By Total" &
+           State == "Texas" &
+           Sex == "All Sexes" &
+           Age.Group == "All Ages") %>%
+  select(State, COVID.19.Deaths, Total.Deaths)
+
+flo <- covid_state_clean %>%
+  filter(Group == "By Total" &
+           State == "Florida" &
+           Sex == "All Sexes" &
+           Age.Group == "All Ages") %>%
+  select(State, COVID.19.Deaths, Total.Deaths)
+
+states4 <- covid_state_clean %>%
+  filter(Group == "By Total" &
+           (State == "California" |
+             State == "New York" |
+             State == "Texas" |
+             State == "Florida")
+           &
+           Sex == "All Sexes" &
+           Age.Group == "All Ages") %>%
+  select(State, COVID.19.Deaths, Total.Deaths) %>%
+  pivot_longer(cols = c("COVID.19.Deaths", "Total.Deaths"), names_to = "Deaths", values_to = "Count")
+
+ggplot(states4, aes(x = State, y = Count, fill = Deaths)) +
+  geom_bar(position = "dodge", stat = "identity") +
+  scale_y_continuous("Deaths (Millions)", labels = unit_format(unit = "M", scale = 1e-6)) +
+  labs(title = "Covid-19 Deaths vs. Total Deaths")
+#Table
+states4b <- covid_state_clean %>%
+  filter(Group == "By Total" &
+           (State == "California" |
+             State == "New York" |
+             State == "Texas" |
+             State == "Florida")
+           &
+           Sex == "All Sexes" &
+           Age.Group == "All Ages") %>%
+  select(State, COVID.19.Deaths, Total.Deaths) %>%
+  mutate(Covid.Death.Perc = (COVID.19.Deaths / Total.Deaths) * 100)
+
+kable(states4b, caption = "Covid-19 Deaths vs Total Deaths in California, Florida, New York and Texas",
+      booktabs = TRUE, digits = 2, col.names = c("State", "Covid-19 Deaths", "Total Deaths", "Covid-19 Death %"),
+      format.args = list(big.mark = ",")) %>%
+  kable_styling(latex_options = "striped", full_width = FALSE)
+```
+
+Nationwide, Covid-19 deaths(1,115,931) significantly outpace influenza deaths(20,933), and are slightly higher than those of pneumonia(1,065,384).This is true for both male and females, and all age groups. Male deaths are around 25% higher than females for both Covid-19 and pneumonia, but are about 5% lower for influenza. Covid-19 deaths are higher in each increasing age groups, as are pneumonia deaths, with the exception of 85+ being slightly lower than 75-84 .Flu deaths also increase as age groups increase, with the exception of 18-29 year old being lower than those under 18. However, the rate of increase in deaths over the age groups is much lower in the flu than it is in both Covid-19 and pneumonia.
+
+In California, Covid-19 accounts for 10.43% of all deaths. Florida has a similar rate of 10.04%. However, the rates are higher in both New York 11.22% and Texas 12.74%.
+
+### 3
+```{r}
+covid_week <- read.csv("Provisional_COVID-19_Deaths_by_Week__Sex__and_Age.csv")
+
+week_clean <- covid_week %>%
+  filter(Age.Group == "All Ages") %>%
+  select(-c(Data.as.of, State, Age.Group)) %>%
+  mutate(End.Week = as.Date(End.Week, "%m/%d/%Y"))
+
+
+
+ggplot(week_clean, aes(x = End.Week, y = COVID.19.Deaths, color = Sex)) +
+  geom_point() +
+  geom_line() +
+  scale_x_date(date_breaks = "3 months", date_minor_breaks = "1 month", date_labels = "%b-%y") +
+  scale_y_continuous("Covid-19 Deaths (Thousands)", labels = unit_format(unit = "K", scale = 1e-3), n.breaks = 6) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  labs(title = "Covid-19 Deaths by Week", x = "Date", y = "Covid-19 Deaths")
+
+ggplot(week_clean, aes(x = End.Week, y = Total.Deaths, color = Sex)) +
+  geom_point() +
+  geom_line() +
+  scale_x_date(date_breaks = "3 months", date_minor_breaks = "1 month", date_labels = "%b-%y") +
+  scale_y_continuous("Deaths (Thousands)", labels = unit_format(unit = "K", scale = 1e-3), n.breaks = 6) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  labs(title = "Total Deaths by Week", x = "Date", y = "Total Deaths")
+
+```
+
+
+
+For Covid-19 Deaths from 2020-2023 in males versus females, males death numbers are consistently slightly higher than that of the females. One visible trend that you can seen through the graph is that during the peaks in Covid deaths (Aug 20, Jan 21, Sept 21, Jan 22) the difference between male and female deaths is the highest, and during the lows the difference is much smaller. Outside of the peaks,the trends in male and female deaths follow each other closely. For the Total Deaths from 2020-2023 in males and females, the trends are similar to that in the Covid deaths. However, the difference between male and females deaths is slightly larger throughout the whole graph, and there is not the same increase in difference during the peaks. The shape/ trends of the graph are similar to that of the Covid deaths with peaks in the same time. However the peaks and valleys are not as dramatic.
+
+### 4
+```{r}
+covid_conds <- read.csv("Conditions_Contributing_to_COVID-19_Deaths__by_State_and_Age__Provisional_2020-2023.csv")
+
+#condition groups
+covid_conds_groups <- covid_conds %>%
+  filter(Group == "By Total") %>%
+  filter(State == "United States") %>%
+  select(c(Condition.Group, Condition, Age.Group, COVID.19.Deaths))
+
+covid_conds_tab <- covid_conds_groups %>%
+  filter(Age.Group == "All Ages") %>%
+  select(Condition.Group, COVID.19.Deaths) %>%
+  group_by(Condition.Group) %>%
+  summarize(COVID.19.Deaths = sum(COVID.19.Deaths)) %>%
+  arrange(desc(COVID.19.Deaths))
+#condition table
+
+kable(covid_conds_tab, caption = "Covid-19 Deaths by Condition Group",
+      booktabs = TRUE, digits = 1, col.names = c("Condition Group", "Covid-19 Deaths"),
+      format.args = list(big.mark = ",")) %>%
+  kable_styling(latex_options = "striped", full_width = FALSE)
+
+#conditions graph
+ggplot(covid_conds_tab, aes(reorder(Condition.Group, COVID.19.Deaths), COVID.19.Deaths)) +
+  geom_col() +
+  scale_x_discrete(labels = c('Adverse Events', 'Alzheimers', 'Obesity', 'Malig. Neoplasms', 'Vascular',
+                              'Sepsis', 'Renal Failure', 'Diabetes', 'Other',
+                              'Circulatory dis.', 'COVID-19', 'Respiratory dis.')) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1)) +
+  scale_y_continuous("Covid 19 Deaths (Millions)", labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 8) +
+  labs(x = "Condition Group", title = "Covid-19 Deaths by Condition Group")
+
+#Age
+covid_age <- covid_conds %>%
+  filter(Age.Group != "Not stated" & Age.Group != "All Ages") %>%
+  filter(Group == "By Total") %>%
+  filter(State == "United States") %>%
+  select(c(Age.Group, COVID.19.Deaths))
+
+#Age Table
+covid_age_tab <- covid_age %>%
+  pivot_wider(names_from = Age.Group, values_from = COVID.19.Deaths, values_fn = sum)
+
+kable(covid_age_tab, caption = "Covid-19 Deaths by Age Group",
+      booktabs = TRUE, digits = 1, col.names = c("0-24", "25-34", "35-44", "45-54", "55-64", "65-74", "75-84", " 85+"), format.args = list(big.mark = ",")) %>%
+  kable_styling(latex_options = "striped", full_width = FALSE)
+
+
+#Age ggplot
+ggplot(covid_age, aes(factor(Age.Group), COVID.19.Deaths)) +
+  geom_col() +
+  labs(title = "Covid-19 Deaths By Age Group", x = "Age Group", y = "Covid-19 Deaths (Millions)") +
+  scale_y_continuous(labels = unit_format(unit = "M", scale = 1e-6), n.breaks = 8)
+
+
+
+```
+
+
+Respiratory and circulatory diseases are by far the most commonly associated conditions with Covid-19 deaths. It is difficult to draw too much of a conclusion from this, because there was not any information about the total number of people with these conditions. There might be a large amount of people with these conditions, compared to the others in the data set, and that could lead to an inflated death count.
+
+From the table and graph, it is clear that age is a key factor in Covid-19 Deaths. As the age group increases, so does the number of Covid-19 Deaths (with the exception of 85+, but this is likely due to the smaller population in this group). Having data that was per-capita would be more revealing, but from this data, the population of over 54 are particularly susceptible to die from Covid-19, with those over 64 being extremely susceptible. On the other side, those under 35 are   not very susceptible, with the under 25 population being the least susceptible.
+
+### 5
+```{r}
+
+cali_covid <- covid_conds %>%
+  filter(Group == "By Total") %>%
+  select(State, Condition, Age.Group, COVID.19.Deaths) %>%
+  filter(State == "California") %>%
+  rename("Covid.19.Death.CA" = COVID.19.Deaths)
+
+NY_covid <- covid_conds %>%
+  filter(Group == "By Total") %>%
+  select(State, Condition, Age.Group, COVID.19.Deaths) %>%
+  filter(State == "New York") %>%
+  rename("Covid.19.Death.NY" = COVID.19.Deaths)
+
+cali_NY_covid <- full_join(cali_covid, NY_covid, by = c("Condition", "Age.Group"))
+#resp diseases
+cali_NY_resp <- cali_NY_covid %>%
+  filter(Condition == "Adult respiratory distress syndrome" |
+           Condition == "Chronic lower respiratory diseases" |
+           Condition == "Influenza and pneumonia" |
+           Condition == "Other diseases of the respiratory system" |
+           Condition == "Respiratory arrest" |
+           Condition == "Respiratory failure") %>%
+  filter(Age.Group == "All Ages") %>%
+  select(-c(State.x, State.y, Age.Group))
+#table
+cali_NY_resp_tab <- cali_NY_resp %>%
+  pivot_longer(cols = c(Covid.19.Death.CA, Covid.19.Death.NY), names_to = "State", values_to = "Deaths") %>%
+  pivot_wider(names_from = Condition, values_from = Deaths) %>%
+  mutate(Totals = rowSums(.[2:7]))
+
+kable(cali_NY_resp_tab, caption = "Covid-19 Deaths in California and New York with Respiratory Diseases",
+      booktabs = TRUE, digits = 1, col.names = c("State", "Influenza and pneumonia", "Chronic lower respiratory diseases",
+                                                 "Adult respiratory distress syndrome", "Respiratory failure",
+                                                 "Respiratory arrest", "Other diseases of the respiratory system", "Total"),
+      format.args = list(big.mark = ",")) %>%
+  add_header_above(c(" " = 1, "Respiratory Disease" = 6, " " = 1)) %>%
+  kable_styling(latex_options = "striped", full_width = FALSE) %>%
+  column_spec(8, bold = TRUE)
+
+
+##ggplot
+var_width = 16
+cali_NY_resp2 <- cali_NY_resp %>%
+  rename("California" = Covid.19.Death.CA) %>%
+  rename("New.York" = Covid.19.Death.NY) %>%
+  pivot_longer(cols = c(California, New.York), names_to = "State", values_to = "Deaths") %>%
+  mutate(Condition = str_wrap(Condition, width = var_width))
+
+ggplot(cali_NY_resp2, aes(x = State, y = Deaths, fill = State)) +
+  geom_col() +
+  facet_grid(. ~ factor(Condition)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1), legend.position = "none") +
+  labs(title = "Covid-19 Deaths with a Respiratory Contributing Condition", subtitle = "California vs. New York") +
+  scale_y_continuous("Deaths (Thousands)", labels = unit_format(unit = "K", scale = 1e-3))
+
+
+#circulatory diseses
+cali_NY_circ <- cali_NY_covid %>%
+  filter(Condition == "Cardiac arrest" |
+           Condition == "Cardiac arrhythmia" |
+           Condition == "Cerebrovascular diseases" |
+           Condition == "Heart failure" |
+           Condition == "Hypertensive diseases" |
+           Condition == "Ischemic heart disease" |
+           Condition == "Other diseases of the circulatory system") %>%
+  filter(Age.Group == "All Ages") %>%
+  select(-c(State.x, State.y, Age.Group))
+
+cali_NY_circ_tab <- cali_NY_circ %>%
+  pivot_longer(cols = c(Covid.19.Death.CA, Covid.19.Death.NY), names_to = "State", values_to = "Deaths") %>%
+  pivot_wider(names_from = Condition, values_from = Deaths) %>%
+  mutate(Totals = rowSums(.[2:8])) # %>%
+# add_row(State ="NY_Cali", ( cali_NY_circ_tab[2,-1 ] / cali_NY_circ_tab[1,-1 ]*100 ))
+
+
+#tabel
+kable(cali_NY_circ_tab, caption = "Covid-19 Deaths in California and New York with Circulatory Diseases",
+      booktabs = TRUE, digits = 1, col.names = c("State", "Hypertensive diseases", "Ischemic heart disease",
+                                                 "Cardiac arrest", "Cardiac arrhythmia",
+                                                 "Heart failure", "Cerebrovascular diseases",
+                                                 "Other diseases of the circulatory system", "Total"),
+      format.args = list(big.mark = ",")) %>%
+  add_header_above(c(" " = 1, "Circulatory Disease" = 7, " " = 1)) %>%
+  kable_styling(latex_options = "striped", full_width = FALSE) %>%
+  column_spec(9, bold = TRUE)#%>%
+#row_spec(3, bold = TRUE)
+
+
+#ggplot
+
+
+cali_NY_circ2 <- cali_NY_circ %>%
+  rename("California" = Covid.19.Death.CA) %>%
+  rename("New.York" = Covid.19.Death.NY) %>%
+  pivot_longer(cols = c(California, New.York), names_to = "State", values_to = "Deaths") %>%
+  mutate(Condition = str_wrap(Condition, width = var_width))
+
+ggplot(cali_NY_circ2, aes(x = State, y = Deaths, fill = State)) +
+  geom_col() +
+  facet_grid(. ~ factor(Condition)) +
+  theme(axis.text.x = element_text(angle = 60, hjust = 1), legend.position = "none") +
+  labs(title = "Covid-19 Deaths with a Circulatory Contributing Condition", subtitle = "California vs. New York") +
+  scale_y_continuous("Deaths (Thousands)", labels = unit_format(unit = "K", scale = 1e-3))
+
+
+```
+
+From the above graphs and tables, it is shown that Covid-19 deaths with both circulatory and respiratory diseases are higher in California than New York. However, this was to be expected, as California has a larger population than New York. The rate of deaths is fairly consistent at around 3 times larger in California than New York, for both circulatory and respiratory contributing conditions.
+

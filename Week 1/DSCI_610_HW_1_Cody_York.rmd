@@ -1,0 +1,52 @@
+---
+title: "DSCI_610_HW_1_Cody_York"
+output: html_notebook
+---
+
+1. (2 pts) Generate two character vectors that hold the names of five countries from each continent and
+their capitals respectively.
+```{r}
+countries <- c("United States", "India", "China", "Ireland", "Canada")
+
+capitols <- c("Washington D.C.", "New Delhi", "Beijing", "Dublin", "Ottawa")
+
+```
+
+2. (5 pts) Generate a matrix with integers that has 12 rows and 5 columns. Treat the rows as 12 subjects.
+Create a character vector that holds identification of these subjects. Feel free to combine letters and
+numbers to create the identifications. Then include this vector and turn the matrix that you created
+earlier into a data frame. Be creative in representing the columns with variables and assign suitable
+column names.
+
+```{r}
+subject_grades <- matrix(40:100, nrow = 12, ncol = 5, byrow = FALSE)
+
+subjects <- c("Math Grades", "English Grades", "Biology Grades", "Statistics Grades", "Geology Grades", "Art Grades",
+              "P.E. Grades", "Reading Grades", "Music Grades", "Programming Grades", "Acting Grades",
+              "Game Development Grades")
+
+grades_df <- data.frame(subject_grades, subjects)
+
+```
+3. (5 pts) Write a function that takes a numeric vector as an argument and returns the standard deviation
+of the elements in the vector.
+```{r}
+
+my_standard_deviation <- function(my_vector) {
+  sd(my_vector)
+}
+
+my_standard_deviation(c(3, 10, 12, 12, 16, 19))
+```
+
+4. (8 pts) Consider the ‘PIdiabetes.csv‘ file. Apply a suitable loop function to find the mean and standard
+deviation of first eight columns in the data set.
+```{r}
+PIdiabetes <- read.csv("PI_diabetes.csv", header = TRUE)
+
+PIdiabetes_first_8_col <- PIdiabetes[, 1:8]
+
+means_per_column <- lapply(PIdiabetes_first_8_col, mean)
+
+sd_per_column <- lapply(PIdiabetes_first_8_col, sd)
+```

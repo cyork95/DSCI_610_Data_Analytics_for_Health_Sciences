@@ -1,0 +1,85 @@
+---
+title: "DSCI_610_HW_4_R_Code_Cody_York"
+output: html_notebook
+---
+
+Import needed libraries:
+```{r}
+library(tidyverse)
+library(kableExtra)
+```
+
+Import the datasets:
+
+I am skipping the first line since it is just something that came with the csv.
+```{r}
+
+nui_2014 <- read.csv('Data/nui_pt_all_counties_IN_2014.csv', header = TRUE, skip = 1)
+nui_2015 <- read.csv('Data/nui_pt_all_counties_IN_2015.csv', header = TRUE, skip = 1)
+nui_2016 <- read.csv('Data/nui_pt_all_counties_IN_2016.csv', header = TRUE, skip = 1)
+nui_2017 <- read.csv('Data/nui_pt_all_counties_IN_2017.csv', header = TRUE, skip = 1)
+nui_2018 <- read.csv('Data/nui_pt_all_counties_IN_2018.csv', header = TRUE, skip = 1)
+nui_2019 <- read.csv('Data/nui_pt_all_counties_IN_2019.csv', header = TRUE, skip = 1)
+nui_2020 <- read.csv('Data/nui_pt_all_counties_IN_2020.csv', header = TRUE, skip = 1)
+
+nui_2014_tb <- as.tibble(nui_2014)
+nui_2015_tb <- as.tibble(nui_2015)
+nui_2016_tb <- as.tibble(nui_2016)
+nui_2017_tb <- as.tibble(nui_2017)
+nui_2018_tb <- as.tibble(nui_2018)
+nui_2019_tb <- as.tibble(nui_2019)
+nui_2020_tb <- as.tibble(nui_2020)
+```
+
+I am next going to make sure the data is properly sorted:
+```{r}
+arrange(nui_2014_tb, X0)
+arrange(nui_2015_tb, X0)
+arrange(nui_2016_tb, X0)
+arrange(nui_2017_tb, X0)
+arrange(nui_2018_tb, X0)
+arrange(nui_2019_tb, X0)
+arrange(nui_2020_tb, X0)
+```
+
+Now I will join all the data together into one dataset:
+```{r}
+all_datasets <- left_join(nui_2014_tb, nui_2015_tb, by = c("X0", "NAME", "state", "county"))
+all_datasets <- left_join(all_datasets, nui_2016_tb, by = c("X0", "NAME", "state", "county"))
+all_datasets <- left_join(all_datasets, nui_2017_tb, by = c("X0", "NAME", "state", "county"))
+all_datasets <- left_join(all_datasets, nui_2018_tb, by = c("X0", "NAME", "state", "county"))
+all_datasets <- left_join(all_datasets, nui_2019_tb, by = c("X0", "NAME", "state", "county"))
+all_datasets <- left_join(all_datasets, nui_2020_tb, by = c("X0", "NAME", "state", "county"))
+
+all_datasets
+```
+
+Next we will perform some cleanup with the extra columns we have
+```{r}
+all_datasets_clean <- pivot_longer(
+  data = all_datasets,
+  cols = c(NUI_PT, NUI_PT.x, NUI_PT.y, NUI_PT.x.x, NUI_PT.y.y, NUI_PT.x.x.x, NUI_PT.y.y.y),
+  names_to = "NUI_PT_Names",
+  values_to = "NUI",
+  values_drop_na = TRUE
+)
+all_datasets_clean <- pivot_longer(
+  data = all_datasets_clean,
+  cols = c(time, time.x, time.y, time.x.x, time.y.y, time.x.x.x, time.y.y.y),
+  names_to = "time_Names",
+  values_to = "year",
+  values_drop_na = TRUE
+)
+
+```
+
+Next, I will graph the number of uninsured people from 2014 to 2020 and try to find a trend.
+
+From the below graph I am not seeing any trend amongst the years from 2014 to 2020.
+```{r}
+ggplot(data = all_datasets_clean, aes(x = year, y = NUI, color = county)) +
+  geom_point() +
+  xlab("Years") +
+  ylab("Number of Uninsured from years 2014 to 2020")
+
+```

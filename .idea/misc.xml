@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.10 (DSCI610_Data_Analytics_for_Health_Sciences)" project-jdk-type="Python SDK" />
+  <component name="RMarkdownSettings">
+    <option name="renderProfiles">
+      <map>
+        <entry key="file://$PROJECT_DIR$/Week 10/DSCI610_HW6_Cody_York.rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="lastOutput" value="$PROJECT_DIR$/Week 10/DSCI610_HW6_Cody_York.nb.html" />
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/Week 10" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/Week 10/Midterm/DSCI610_MidtermProject.Rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="lastOutput" value="$PROJECT_DIR$/Week 10/Midterm/DSCI610_MidtermProject.html" />
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/Week 10/Midterm" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/Week 2/DSCI610_HW2_Cody_York.rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="lastOutput" value="$PROJECT_DIR$/Week 2/DSCI610_HW2_Cody_York.nb.html" />
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/Week 2" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/Week 2/Tables_html.Rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/Week 2" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/Week 4/DSCI610_HW3_Cody_York.rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/Week 4" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/Week 6/DSCI_610_HW_4_R_Code_Cody_York.rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="lastOutput" value="$PROJECT_DIR$/Week 6/DSCI_610_HW_4_R_Code_Cody_York.nb.html" />
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/Week 6" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/Week 7/DSCI_610_HW5_Cody_York_R_Code.rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="lastOutput" value="$PROJECT_DIR$/Week 7/DSCI_610_HW5_Cody_York_R_Code.nb.html" />
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/Week 7" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+        <entry key="file://$PROJECT_DIR$/Week_11/dsci_610_hw_7_Cody_York.rmd">
+          <value>
+            <RMarkdownRenderProfile>
+              <option name="outputDirectoryUrl" value="file://$PROJECT_DIR$/Week_11" />
+            </RMarkdownRenderProfile>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

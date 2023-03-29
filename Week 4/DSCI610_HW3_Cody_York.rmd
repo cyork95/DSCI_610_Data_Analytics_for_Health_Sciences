@@ -1,0 +1,65 @@
+---
+title: "DSCI610 HW3 NHANES Survey Data and Study Designs"
+output: html_notebook
+---
+
+4. (8 pts) Import all three data sets into R and combine a subset of variables into an analysis dataset. Save the dataset as .rds file. You can use R markdown to for this question.
+```{r}
+install.packages("foreign")
+library(foreign)
+library(tidyverse)
+library(kableExtra)
+
+demographics <- read.xport("Week 4/data/P_DEMO.XPT")
+hep_b_d <- read.xport("Week 4/data/P_HEPBD.XPT")
+blood_count <- read.xport("Week 4/data/P_CBC.XPT")
+
+demographics_sb <- select(demographics, SEQN, RIAGENDR, RIDAGEYR, RIDRETH3, DMDEDUC2, DMDMARTZ)
+blood_count_sb <- select(blood_count, SEQN, LBXWBCSI, LBXRBCSI, LBXHGB)
+
+DEMO_HEP <- left_join(demographics_sb, hep_b_d, by = "SEQN")
+
+DEMO_HEP_BLOOD <- left_join(DEMO_HEP, blood_count_sb, by = "SEQN")
+
+#saveRDS(DEMO_HEP_BLOOD, file= "DEMO_HEP_BLOOD.rds")
+
+```
+
+5. (4 pts) Create at least two descriptive statistics tables for two key variables from your analysis dataset.  You can use the same R markdown file in question 4 to create the summary tables.
+```{r}
+df_DEMO_HEP_BLOOD <- readRDS("Week 4/DEMO_HEP_BLOOD.rds")
+
+df_DEMO_HEP_BLOOD_categorical <- filter(df_DEMO_HEP_BLOOD, DMDEDUC2 != "NA", DMDMARTZ != "NA", LBXHBC != "NA", LBDHBG != "NA", LBDHD != "NA", LBXWBCSI != "NA", LBXRBCSI != "NA", LBXHGB != "NA")
+
+df_DEMO_HEP_BLOOD_WBC_stats <- df_DEMO_HEP_BLOOD_categorical %>%
+  group_by(RIAGENDR, RIDRETH3) %>%
+  summarise(mean = mean(LBXWBCSI), stdev = sd(LBXWBCSI), N = n()) %>%
+  ungroup() %>%
+  pivot_wider(names_from = RIAGENDR, values_from = c(mean, stdev, N)) %>%
+  select(RIDRETH3, everything())
+
+kable(df_DEMO_HEP_BLOOD_WBC_stats,
+      caption = "Descriptive Stats for White BLood Cell Count vs Gender and Ethnicity",
+      escape = F,
+      digits = 3,
+      longtable = T,
+      col.names = c("Ethnicity", "Mean", "St. deviation", "N", "Mean", "St. deviation", "N")) %>%
+  add_header_above(c(" " = 1, "Male" = 3, "Female" = 3))
+
+```
+```{r}
+df_DEMO_HEP_BLOOD_HBSA_stats <- df_DEMO_HEP_BLOOD_categorical %>%
+  group_by(RIAGENDR, RIDRETH3) %>%
+  summarise(mean = mean(LBDHBG), stdev = sd(LBDHBG), N = n()) %>%
+  ungroup() %>%
+  pivot_wider(names_from = RIAGENDR, values_from = c(mean, stdev, N)) %>%
+  select(RIDRETH3, everything())
+
+kable(df_DEMO_HEP_BLOOD_HBSA_stats,
+      caption = "Descriptive Stats for Hepatitis B surface antigen vs Gender and Ethnicity",
+      escape = F,
+      digits = 3,
+      longtable = T,
+      col.names = c("Ethnicity", "Mean", "St. deviation", "N", "Mean", "St. deviation", "N")) %>%
+  add_header_above(c(" " = 1, "Male" = 3, "Female" = 3))
+```

@@ -1,0 +1,111 @@
+---
+title: "DSCI 610 HW2 Introduction to EDA"
+output: html_notebook
+---
+
+### Import Statements
+```{r}
+library(NHANES)
+library(tidyverse)
+library(kableExtra)
+```
+
+### 1. (8 pts) Select at least three categorical variables from the ‘NHANES‘ data that are not considered in the lecture notes. Be creative in presenting variation in each and covariation in at least two of them.
+
+#### Create the dataset.
+
+```{r}
+as_tibble(NHANES)
+
+df_eda_3_categorical <- select(NHANES, Education, HomeOwn, Work)
+df_eda_3_categorical <- filter(df_eda_3_categorical, Education != "NA", HomeOwn != "NA", Work != "NA")
+df_eda_3_categorical
+
+```
+
+#### The below graph will show the variation of Education. We see that in this dataset most people have gone to college or hold a degree.
+```{r}
+ggplot(data = df_eda_3_categorical) +
+  geom_bar(mapping = aes(x = Education))
+
+```
+
+#### The below graph will show the variation of Home Ownership. We can see that in this dataset most people own a home.
+```{r}
+ggplot(data = df_eda_3_categorical) +
+  geom_bar(mapping = aes(x = HomeOwn))
+```
+
+#### The below graph will show the variation of Working Status. We can see that in this dataset, most people are working, however there are quite a bit without a job or looking.
+```{r}
+ggplot(data = df_eda_3_categorical) +
+  geom_bar(mapping = aes(x = Work))
+```
+
+#### Below we are creating a graph that shows the covariation of Level of Education and Work. We can see that as Education increases so does the number currently working.
+```{r}
+ggplot(data = df_eda_3_categorical) +
+  geom_bar(mapping = aes(x = Education, fill = Work), position = "dodge")
+```
+
+#### Finally, I am creating a covariation between Education and Home Ownership. We can see that as education increases more people own a home and after obtaining a college degree less people rent and even more own.
+```{r}
+ggplot(data = df_eda_3_categorical) +
+  geom_bar(mapping = aes(x = Education, fill = HomeOwn), position = "dodge")
+```
+
+### 2. (8 pts) Select two continuous variables from the ‘NHANES‘ data that are not considered in the lecture notes. Be creative in presenting variation in each and covariation in between them by considering the levels of at least one categorical variables that you picked in (1).
+```{r}
+df_eda_2_continuous <- select(NHANES, DaysMentHlthBad, SleepHrsNight)
+df_eda_2_continuous <- filter(df_eda_2_continuous, DaysMentHlthBad != "NA", SleepHrsNight != "NA")
+df_eda_2_continuous
+```
+
+#### Below is a visualization of the variance of the days they had bad mental health. I set the bandwidth to 5 since there were a lot of values in between each step this keeps it cleaner. We can see by the below visualization that most people didn't have bad mental health.
+```{r}
+ggplot(data = df_eda_2_continuous) +
+  geom_histogram(mapping = aes(x = DaysMentHlthBad), binwidth = 5)
+
+```
+
+#### Next we will show the variance of the number of sleep hours the participants had at night. I set the bandwidth to one since the observations were between 0 and 13 we would be able to easily see all data. We can tell from the below data that most people get between 6 and 8 hours of sleep.
+```{r}
+ggplot(data = df_eda_2_continuous) +
+  geom_histogram(mapping = aes(x = SleepHrsNight), binwidth = 1)
+```
+
+#### For the next part I will create a dataset with all 5 attributes I am working with.
+```{r}
+df_eda_5_attributes <- select(NHANES, Education, HomeOwn, Work, DaysMentHlthBad, SleepHrsNight)
+df_eda_5_attributes <- filter(df_eda_5_attributes, Education != "NA", HomeOwn != "NA", Work != "NA",
+                              DaysMentHlthBad != "NA", SleepHrsNight != "NA")
+df_eda_5_attributes
+```
+
+
+#### Next I will show a covariance of what effect education has on days of bad mental health. We can tell there isn't a large effect other than having a college degree seems to lesson it some. However there is more bad mental health with those that dropped
+```{r}
+ggplot(data = df_eda_5_attributes, mapping = aes(x = Education, y = DaysMentHlthBad)) +
+  geom_boxplot()
+```
+
+### Below is a table of the descriptive statistics for bad mental health in regard to education and work.
+```{r}
+df_eda_5_attributes_bad_mental_health_stats <- df_eda_5_attributes %>%
+  filter(!is.na(DaysMentHlthBad)) %>%
+  group_by(Education, Work) %>%
+  summarise(mean = mean(DaysMentHlthBad), stdev = sd(DaysMentHlthBad), N = n()) %>%
+  ungroup() %>%
+  pivot_wider(names_from = Work, values_from = c(mean, stdev, N)) %>%
+  select(Education, +ends_with("College Grad"), everything())
+
+kable(df_eda_5_attributes_bad_mental_health_stats,
+      caption = "Descriptive Stats for Bad Mental Health vs Education and Work Status",
+      escape = F,
+      digits = 3,
+      longtable = T,
+      col.names = c("Education", "Mean", "St. deviation", "N", "Mean", "St. deviation", "N",
+                    "Mean", "St. deviation", "N")) %>%
+  add_header_above(c(" " = 1, "Looking" = 3, "Working" = 3, "Not Working" = 3))
+```
+

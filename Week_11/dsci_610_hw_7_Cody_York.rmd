@@ -1,0 +1,114 @@
+---
+title: "DSCI_610_HW_7_Count_Data_Analysis_Cody_York"
+output: html_notebook
+---
+
+Import the libraries and datasets:
+```{r}
+library(tidyr)
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(kableExtra)
+library(stringr)
+library(tidyverse)
+library(tibble)
+
+setwd("C:\\Users\\cy_su\\PycharmProjects\\DSCI610_Data_Analytics_for_Health_Sciences\\Week_11\\")
+
+covid_state <- read.csv("Provisional_COVID-19_Deaths_by_Sex_and_Age.csv")
+covid_conds <- read.csv("Conditions_Contributing_to_COVID-19_Deaths__by_State_and_Age__Provisional_2020-2023.csv")
+```
+
+We will clean the data by selecting relevant columns.
+Next, we want only the states California and Indiana.
+```{r}
+covid_state_cleaned_data <- covid_state %>%
+  select(State, Sex, Age.Group, COVID.19.Deaths) %>%
+  filter(State %in% c("California", "Indiana"))
+head(covid_state_cleaned_data)
+```
+
+# Question 1:
+Creating the Male vs Female Dataset
+```{r}
+male_female_covid_19_deaths <- covid_state_cleaned_data %>%
+  group_by(State, Sex) %>%
+  filter(Age.Group == "All Ages" & Sex != "All Sexes")
+
+male_female_covid_19_deaths
+
+```
+
+Plot the graph for Deaths by sex for Indiana and California
+```{r}
+ggplot(male_female_covid_19_deaths, aes(x = State, y = COVID.19.Deaths, fill = Sex)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "State", y = "Covid Deaths (per 100,000)", fill = "Sex") +
+  ggtitle("COVID-19 Deaths by Sex for California and Indiana")
+```
+
+
+We can see from this graph that significantly more people died in California, but that is likely due to there being a lot more people there However, we do see that there are many more deaths from Males then Females. This means that the lifestyles in Males lead to more deaths iin both states.
+
+
+Next, I will create the dataset for deaths by age group. In this case, I have defines young as anyone under 50 and old as anyone 50 or above.
+```{r}
+age_covid_19_deaths <- covid_state_cleaned_data %>%
+  group_by(State, Age.Group) %>%
+  filter(Age.Group != "All Ages" & Sex == "All Sexes")
+
+young_old__covid_19_deaths <- age_covid_19_deaths %>%
+  filter(Age.Group == "0-17 years" |
+           Age.Group == "18-29 years" |
+           Age.Group == "30-39 years" |
+           Age.Group == "40-49 years" |
+           Age.Group == "40-49 years" |
+           Age.Group == "50-64 years" |
+           Age.Group == "65-74 years" |
+           Age.Group == "75-84 years" |
+           Age.Group == "85 years and over")
+
+head(young_old__covid_19_deaths)
+
+```
+
+Next, I will graph the above datasets to do a comparison of old versus young deaths.
+```{r}
+ggplot(young_old__covid_19_deaths, aes(x = Age.Group, y = COVID.19.Deaths, fill = State)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  #
+  facet_wrap(~sex, ncol = 2) +
+  labs(x = "Age Group", y = "Deaths (per 100,000)", fill = "State") +
+  ggtitle("COVID-19 Death Rates by Age Group for California and Indiana")
+```
+
+This plot shows the death rates from COVID-19 for young versus older people in California and Indiana. We can see that in both states, the death rate is much higher for older people than younger people. In both California and Indiana, the death rate for older people is significantly higher than for younger people.
+
+# Question 2
+
+Import and clean the data:
+```{r}
+covid_deaths_grouped <- covid_conds %>%
+  group_by(Condition.Group) %>%
+  filter(Condition.Group == "Respiratory diseases" | Condition.Group == "Circulatory diseases")
+```
+Fit a poisson regression model to get a death rate and predicted values
+```{r}
+poisson_model <- glm(COVID.19.Deaths ~ Condition.Group, data = covid_deaths_grouped, family = "poisson")
+summary(poisson_model)
+
+predicted_deaths <- predict(poisson_model, type = "response")
+```
+
+Create a graph showing the actual Covid 19 Deaths by
+```{r}
+
+ggplot(covid_deaths_grouped, aes(x = Condition.Group, y = COVID.19.Deaths)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(title = "Death Rates from COVID-19 by Condition Group in the United States",
+       x = "Condition Group", y = "Death Rate")
+
+```
+
+    This graph of the data makes sense because using the Poisson model we can see that the respiratory conditions like influenza and pnuemonia led to a higher chance of death as opposed to ciurculatory diseases.
