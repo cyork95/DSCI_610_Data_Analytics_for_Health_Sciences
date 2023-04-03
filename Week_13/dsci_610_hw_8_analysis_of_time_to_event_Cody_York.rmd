@@ -1,0 +1,47 @@
+---
+title: "DSCI 610: Analysis of Time-to-Event Data"
+output: html_notebook
+---
+
+## Install needed packages and set working directory:
+```{r}
+library("tidyverse")
+library("survival")
+library("ggfortify")
+library("tidyr")
+
+setwd("C:\\Users\\cy_su\\DataspellProjects\\DSCI_610_Data_Analytics_for_Health_Sciences\\Week_13")
+```
+
+## Import the data:
+```{r}
+ovarian_cancer_txt <- read_lines("oc.txt", skip = 15)
+ovarian_cancer_df <- data.frame(ovarian_cancer_txt)
+ovarian_cancer_df <- separate(ovarian_cancer_df, col = ovarian_cancer_txt, into = c('Age', 'Grade', 'Stage', 'Residual_Disease', 'Treatment', 'Time_to_Reoccurance', 'Event'))
+
+```
+
+## 1.
+    Consider the data in the data set (oc.txt) on time (in days) from the second look laparotomy
+    (2LL) to recurrence of ovarian cancer. Please read the header of the data file for a description of the
+    variables.
+
+    (a) Plot the Kaplan-Meier estimates of the survival curves for each of the two treatment groups on
+    one plot. Calculate 95% confidence intervals for the survival functions at 365 days and 1096 days
+    (i.e., 1 and 3 yr survival).
+
+    (b) Perform the logrank test comparing the survival experience of the two groups. Interpret the results.
+```{r}
+time <- as.integer(ovarian_cancer_df[, 6]) #time in days
+delta <- as.integer(ovarian_cancer_df[, 7])
+group <- as.integer(ovarian_cancer_df[, 5])
+
+fit <- survfit(Surv(time, delta) ~ group, conf.type = "log-log")
+
+summary(fit)
+```
+
+Plot the survival estimates
+```{r}
+autoplot(fit, surv.linetype = 'dashed', censor.shape = '*', conf.int = FALSE, censor.size = 5)
+```
