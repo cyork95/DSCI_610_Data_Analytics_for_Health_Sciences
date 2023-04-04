@@ -41,7 +41,76 @@ fit <- survfit(Surv(time, delta) ~ group, conf.type = "log-log")
 summary(fit)
 ```
 
-Plot the survival estimates
+### Plot the survival estimates
 ```{r}
 autoplot(fit, surv.linetype = 'dashed', censor.shape = '*', conf.int = FALSE, censor.size = 5)
 ```
+
+## 2.
+    Following surgical treatment of ovarian cancer, patients may undergo a course of chemotherapy.
+    In a study of two different forms of chemotherapy treatment (Edmunson, 1979), researchers compared the anti-tumor
+    effects of cyclophosphamide alone and cyclophosphamide combined with adriamycin.
+
+    The trial involved 26 women with minimal residual disease and who had experienced surgical excision
+    of all tumor masses greater than 2 cm in diameter. Following the surgery, the patients were further
+    classified according to whether the residual disease was completely or partially excised.
+    The age of the patient and their performance status were also recorded at the beginning of the trial.
+    The response variable was the survival time in days following randomization to one or other of the two
+    chemotherapy treatments. The variables in the data set (Chemotherapy in ovarian cancer patients.dat)
+    are as follows:
+    Time: Survival time in days
+    Status: Event indicator (0 = censored, 1 = uncensored)
+    Treat: Treatment (1=single, 2= combined)
+    Age: Age of patient in years
+    Rdisease: Extent of residual disease (1= incomplete, 2 = complete)
+    Perf: Performance status: (1 = good, 2 = poor)
+
+    Fit a Cox proportional hazards model adjusting for age, extent of residual disease, and performance.
+    Interpret the results.
+
+    Read in the data and clean the data:
+```{r}
+chemotherapy_data <- read.delim('Chemotherapy in ovarian cancer patients.dat', header = TRUE, sep = "")
+chemotherapy_data
+mean(chemotherapy_data$age)
+chemotherapy_data_age_mutated <- mutate(chemotherapy_data, age.55 = age - 55)
+chemotherapy_data_age_mutated
+```
+
+### Cox Proportional Hazards Model Build for Regular Age:
+```{r}
+coxph.M_1 <- coxph(Surv(time, status) ~ age + rdisease + perf, data = chemotherapy_data)
+summary(coxph.M_1)
+```
+
+### Cox Proportional Hazards Model Build for 55-year-old:
+```{r}
+coxph.M_2 <- coxph(Surv(time, status) ~ age.55 + rdisease + perf, data = chemotherapy_data_age_mutated)
+summary(coxph.M_2)
+```
+
+### Interpretation
+    1. β1 = 0.142. This means that the difference in the log hazard of a patient being 56 and a patient being 55 is 0.142. This means that being 56 is more of a hazard then being 55
+    2. β2 = 0.674. This means that the difference in the log hazard of a patient having a complete residual disease and a pateint having an incomplete residual disease is 0.674. This means that having a complete residual disease is more hazardous than having a not complete residual disease.
+    3. β3 = 0.215. This means that the difference in the log hazard of a patient having poor performence and a patient having good performence is 0.215. This means that having poor performence is more hazardous then having good performence.
+
+### Likelihood Ratio Test
+```{r}
+coxph.M_3 <- coxph(Surv(time, status) ~ rdisease + perf, data = chemotherapy_data_age_mutated)
+anova(coxph.M_3, coxph.M_2)
+```
+```{r}
+coxph.M_4 <- coxph(Surv(time, status) ~ age.55 + perf, data = chemotherapy_data_age_mutated)
+anova(coxph.M_4, coxph.M_2)
+```
+```{r}
+coxph.M_5 <- coxph(Surv(time, status) ~ age.55, data = chemotherapy_data_age_mutated)
+anova(coxph.M_5, coxph.M_2)
+```
+```{r}
+summary(coxph.M_5)
+```
+### Interpretation of final model
+    Since the liklihood of the ratio test with extent of residual disease and perofrmence were not significant, they have been removed from the final model leaving only age.
+
+    1. β1 = 0.161. This means that the difference in the log hazard of a patient being 56 and a patient being 55 is 0.161. This means that being 56 is more of a hazard then being 55
