@@ -1,0 +1,346 @@
+---
+title: "Model Specification for Autism study"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Longitudinal Data: Autism study
+## General Model Specification
+
+\begin{itemize}
+\item M-1: model M-1 includes the fixed effects of age, age-squared, SICD group, and SICD group by age interaction and the SICD by age-squared interaction  
+\item Model M-1 also includes three random effects associated with each child: a random intercept, a random age effect, and a random age-squared effect
+\end{itemize}
+
+
+Let $y_{ij}$ be an individual response, $VSAE_{ij}$ on child $i$ at the $j$-th visit (j = 1,2,3,4,5) corresponding to ages $(2,3,5,9,13)$. A general random coefficient model is written as follows:
+\[
+M_1: y_{ij} = \beta_0 + \beta_1 x_{1ij} + \beta_2 x_{2ij} + \beta_3 x_{3i} + \beta_4 x_{4i} + \beta_5 x_{1ij}\times x_{3i} + \beta_6 x_{1ij} \times x_{4i} + \beta_7 x_{2ij}\times x_{3i} + \beta_8 x_{2ij} \times x_{4i}+ u_{0i} + u_{1i} \times x_{1ij} + u_{2i} \times x_{2ij}+\epsilon_{ij}
+\]
+
+
+\begin{itemize}
+\item $x_{1ij}$ represents the value of Age minus 2 so that VSAE scores at other ages are comparable to that at age 2. $x_{2ij}$ represents the squared of $x_{1ij}$
+
+
+\item \[ x_{3i} = \left\{ \begin{array}{ll}
+1 & \mbox{SICDEGP is 1};\\
+0 & \mbox{otherwise}.\end{array} \right. \]
+
+\item \item \[ x_{4i} = \left\{ \begin{array}{ll}
+1 & \mbox{SICDEGP is 2};\\
+0 & \mbox{otherwise}.\end{array} \right. \]
+
+\item $\beta_0 - \beta_8$ represent the fixed effects associated with the intercept, the covariates and the interaction terms in the model
+\item $\beta_0$ represents the mean predicted VSAE score for children at 2 years of age for the SICD group 3
+\item $\beta_1$ and $\beta_2$ represent the fixed effects of age and age-squared for the SICD group 3
+
+\item $\beta_3$ and $\beta_4$ represent the fixed effects associated with the SICD group 1 and 2
+
+\item In particular, $\beta_3$ represents the difference in the intercept for the SICD group 1 and the reference group SICD at 3
+
+\item Similar interpretation for $\beta_4$
+
+\item  $\beta_5$ and $\beta_6$  represent the differences in the linear effect of age between SICD group 1 and 2 and the linear effect of age  in the SICD group 3 respectively
+
+\item $\beta_7$ and $\beta_8$  represent the differences in the quadratic effect of age between SICD group 1 and 2 and the quadratic effect of age  in the SICD group 3 respectively
+
+\item $u_{0i}, u_{1i}, u_{2i}$ represent the random effects associated with the intercept, linear effect of age and the quadratic effect of age for child $i$.
+
+\item Assume the distribution of the random vector of three random effects $\mathbf{u}_{i}$ associated with child $i$ as multivariate normal. That is,
+
+\[
+\mathbf{u}_{i} = \begin{pmatrix}
+u_{0i}\\
+u_{1i}\\
+u_{2i}
+\end{pmatrix} \sim {N}_3(\mathbf{0}, \mathbf{D}).
+\]
+Here the variance-covariance matrix of the three random effects is defined as
+
+\[
+\mathbf{D} = \begin{pmatrix}
+\sigma^2_{int} & \sigma_{int, age} & \sigma_{int, age^2} \\
+\sigma_{int, age} & \sigma^2_{age} & \sigma_{age, age^2}\\
+\sigma_{int, age^2} & \sigma_{age, age^2} &  \sigma^2_{age^2}
+\end{pmatrix},
+\]
+where $\sigma^2_{int}, \sigma^2_{age},\sigma^2_{age^2}$ are the variances of the random intercept, the random effect of age and  the random effect of the age-sqaured. The off-diagonals are the covariances of the pair-wise random effects.
+
+
+\item Finally, $\epsilon_{ij}$ is the residual associated with the observation at time $j$ on child $i$. The residuals are assumed to independent and identically distirbuted conditional on the random effects
+
+\[
+\epsilon_{ij} \sim N(0, \sigma^2).
+\]
+
+\item Residuals are also assumed to be independent of the random effects
+
+\end{itemize}
+
+### Hierarchical Model Specification
+
+\begin{itemize}
+
+\item Level 1 Model (Time)
+
+\[
+y_{ij} = \beta_{0i} + \beta_{1i} x_{1ij} + \beta_{2i} x_{2ij}  +\epsilon_{ij}
+\]
+
+where $\epsilon_{ij} \sim N(0,\sigma^2)$.
+
+\item Level 1 model has the child specific quadratic regressions of VSAE of age and age-squared
+\item The random intercept $\beta_{0i}$, the random linear and quadratic effects of age $\beta_{1i}, \beta_{2i}$ vary between children
+\item $\beta_{0i},\beta_{1i}, \beta_{2i}$ in the level 1 model depend on fixed effects associated with level 2 covariates and random effetcs
+
+
+\item Level 2 model (child)
+
+\[
+\beta_{0i} = \beta_{0} + \beta_{3} x_{3i} + \beta_{4} x_{4i}  +u_{0i}
+\]
+\[
+\beta_{1i} = \beta_{1} + \beta_{5} x_{3i} + \beta_{6} x_{4i}  +u_{1i}
+\]
+\[
+\beta_{2i} = \beta_{2} + \beta_{7} x_{3i} + \beta_{8} x_{4i}  +u_{2i}
+\]
+
+
+\item where,
+\[
+\mathbf{u}_{i} = \begin{pmatrix}
+u_{0i}\\
+u_{1i}\\
+u_{2i}
+\end{pmatrix} \sim {N}_3(\mathbf{0}, \mathbf{D}).
+\]
+
+\item The intercept $\beta_{0i}$ for child $i$ depends on the fixed overall intercept $\beta_0$, fixed effects $(\beta_3, \beta_4)$ of the child level covariates,  indicators of SICD group 1 $(x_{3i})$ and SICD group 2 $(x_{4i})$ and a random effect $u_{0i}$ associated with child $i$
+
+\item The child specific linear effect of age $\beta_{1i}$ depends on the overall fixed effect of age $\beta_1$,  fixed effects $(\beta_5, \beta_6)$ of indicators of SICD group 1 and SICD group 2, and a random effect $u_{1i}$ associated with child $i$
+
+\item The child specific quadratic effect of age $\beta_{2i}$ depends on the overall fixed effect of age-squared $\beta_2$,  fixed effects $(\beta_7, \beta_8)$ of indicators of SICD group 1 and SICD group 2, and a random effect $u_{2i}$ associated with child $i$
+\end{itemize}
+
+## Hypothesis Tests:
+
+\begin{enumerate}
+
+\item M-2: Fit a model without the random child-specific intercepts. The rationale for this model is that there was little variability in the VSAE scores at age 2 which can be attributed to random error, instead of between-subject variability.
+
+\item M-2 implies child-specific predicted trajectories within a given level of SICD group have a common VSAE score at age 2
+
+\item M-2.A: The random effects associated with the quadratic effect of age can  be ommitted  from the model M-1. This is equivalent to testing the following hypotheses:
+
+\item
+\[
+H_0: \mathbf{D} = \begin{pmatrix}
+\sigma^2_{age} & 0\\
+0 & 0
+\end{pmatrix}
+\]
+
+\[
+H_A: \mathbf{D} = \begin{pmatrix}
+\sigma^2_{age} & \sigma_{age, age^2}\\
+\sigma_{age, age^2} & \sigma^2_{age^2}
+\end{pmatrix}.
+\]
+
+\item REML based likelihood ratio test is used for testing this hypothesis. For large sample this test statistic follows  a mixture of $\chi^2_1$ and $\chi^2_2$ distributions with equal weights $0.5$.
+
+\item The fixed effects associated with the age-squared by SICD group interaction can be excluded from the model
+
+\[
+H_0: \beta_7 = \beta_8 = 0
+\]
+
+\[
+H_A: \beta_7 \ne 0\;\; \mbox{Or}\;\;  \beta_8 \ne 0
+\]
+
+\item  ML based likelihood ratio test
+
+\item The fixed effects associated with the age by SICD group interaction can be excluded from the model
+
+\[
+H_0: \beta_5 = \beta_6 = 0
+\]
+
+\[
+H_A: \beta_5 \ne 0\;\; \mbox{Or}\;\;  \beta_6 \ne 0
+\]
+
+\item  ML based likelihood ratio test
+
+\end{enumerate}
+
+
+## Model Fitting with R
+
+### Prepare data for fitting random coefficient model
+
+```{r}
+# Read in Rat Brain data in long format.
+autism <- read.csv("autism.csv", h = T)
+autism$age_2 = autism$age - 2
+autism$age_2sq = (autism$age_2)^2
+
+# Define SICD factors
+
+autism$sicdF[autism$sicdegp == 3] <- 0
+autism$sicdF[autism$sicdegp == 2] <- 2
+autism$sicdF[autism$sicdegp == 1] <- 1
+autism$sicdF <- factor(autism$sicdF)
+
+#head(autism)
+
+autism2 <- autism[complete.cases(autism),]
+
+#summary(autism2)
+```
+
+
+### Fit a random coefficient model M-1
+
+```{r}
+library(nlme)
+
+# Model M-1: Random intercept, random age and age-squared effects model
+M.1_fit <- lme(vsae ~ age_2 +
+		age_2sq +
+		sicdF +
+		age_2:sicdF +
+		age_2sq:sicdF, random = ~age_2 + age_2sq | childid, method = "REML", data = autism2)
+
+# You will get an error when excute the above code. Because the REML estimation algorithm did not converge to a solution for the parameter estimates
+# 
+#summary(M.1_fit) # No summary is available
+
+# Model M-2: Model without random intercept, random age and age-squared effects model
+M.2_fit <- lme(vsae ~ age_2 +
+		age_2sq +
+		sicdF +
+		age_2:sicdF +
+		age_2sq:sicdF, random = ~age_2 + age_2sq - 1 | childid, method = "REML", data = autism2)
+
+summary(M.2_fit)
+
+# Model M-2A: Random quadratic age effect can be ommitted
+M.2A_fit <- lme(vsae ~ age_2 +
+		age_2sq +
+		sicdF +
+		age_2:sicdF +
+		age_2sq:sicdF, random = ~age_2 - 1 | childid, method = "REML", data = autism2)
+
+summary(M.2A_fit)
+anova(M.2A_fit, M.2_fit)
+
+
+
+```
+
+
+REML log-likelihood Ratio Test Statistic: $-2[REML log-likelihoo(M.2A) - REML log-likelihoo(M.2)] = -2[-2349.601 +2307.638] = 83.9$.
+
+The test statistic follows a mixture of $\chi^2$ distributions with equal weights $0.5$ and 1 and 2 degrees of freedom. The p-value for this test is calculated as follows:
+
+```{r}
+0.5 * (1 - pchisq(83.9, 1) + 0.5 * (1 - pchisq(83.9, 2)))
+```
+
+Since the p-value is close to 0, the likelihood ratio test indicates that the random quadratic effetcs os age should be retained in the model.
+
+
+## Test on Fixed Effects
+
+### Fixed effects associated with the age-sqaured by SICD group interaction can be ommitted
+
+```{r}
+# Model M-2 with ML fit 
+M.2_ML <- lme(vsae ~ age_2 +
+		age_2sq +
+		sicdF +
+		age_2:sicdF +
+		age_2sq:sicdF, random = ~age_2 + age_2sq - 1 | childid, method = "ML", data = autism2)
+
+# Model M-3 with ML fit
+M.3_ML <- lme(vsae ~ age_2 + age_2sq + sicdF + age_2:sicdF, random = ~age_2 + age_2sq - 1 | childid, method = "ML", data = autism2)
+anova(M.3_ML, M.2_ML)
+```
+
+Based on the more conservative ML based likelihood ratio test, we fail to reject the null hypothesis that the fixed effects of the age-sqaured by SICD group interaction is zero. Thus we drop this interaction from the model.
+
+### Fixed effects associated with the age by SICD group interaction can be ommitted
+
+```{r}
+
+# Model M-4 with ML fit
+M.4_ML <- lme(vsae ~ age_2 + age_2sq + sicdF, random = ~age_2 + age_2sq - 1 | childid, method = "ML", data = autism2)
+anova(M.4_ML, M.3_ML)
+```
+
+Based on the ML based likelihood ratio test, we reject the null hypothesis that the fixed effects of the age by SICD group interaction is zero. Thus we keep this interaction in the model. Therefore, model M-3 can be considered as the final model
+
+```{r}
+library(nlme)
+M.3_final <- lme(vsae ~ age_2 + age_2sq + sicdF + age_2:sicdF, random = ~age_2 + age_2sq - 1 | childid, method = "REML", data = autism2)
+summary(M.3_final)
+anova(M.3_final)
+```
+
+## Final Model: Interpretation of the parameter estimates
+
+### Fixed-Effect Parameter Estimates
+\begin{enumerate}
+\item The intercept $\hat{\beta}_0 = 13.46$ represented the estimated mean VSAE score for the children at 2 years of age in the reference category of SICD group 3
+\item Children in SICD group 3 had the highest initial language scores
+\item The parameter estimates $\hat{\beta_1} = 6.15$ and $\hat{\beta_2} =0.11$ are positive and significant
+\item And suggests an increasing trend in VSAE scores as a function of age for children in SICD group 3
+\item $\hat{\beta_3} = -4.99$, suggesting that the mean initial VSAE score for children in SCID group 1 is 4.99 units lower than that of children in the reference group (SICD group 3)
+\item $\hat{\beta_4} = -3.62$, suggesting that the mean initial VSAE score for children in SCID group 2 is 3.62 units lower than that of children in the reference group (SICD group 3)
+\item Recall the interaction effect $\beta_5$ represents the difference in the linear effect of age in SICD group 1 versus the SICD group 3
+\item $\hat{\beta}_5 = -4.07$ meaning that the linear age effect for children in SICD group 1 is 4.07 units less than that for children in SICD group 3
+\item Note that estimated linear age effect for children in SICD group 1 is $6.15 - 4.07 = 2.08$ which is still positive
+\item $\hat{\beta}_6 = -3.50$ meaning that the linear age effect for children in SICD group 2 is 3.5 units less than that for children in SICD group 3
+\item That means the estimated linear age effect for children in SICD group 2 is $6.15 - 3.5 = 2.65$ and is  positive and similar to that for children in SICD group 1
+\end{enumerate}
+
+\pagebreak
+
+### Variance-covariance matrix for $i$th child
+The marginal variance-covariance matrix for the $i$-th child implied by the final model can be written as follows:
+\[\mathbf{V}_i = \mathbf{Z}_i \mathbf{D} \mathbf{Z}^{T}_i + \mathbf{R}_i\]
+For example, for a child with id 1, $\mathbf{V}_1$ is estimated as below:
+
+```{r}
+#Variance covariance for child 1
+getVarCov(M.3_final, individual = "1", type = "marginal")
+
+#Variance covariance for child 6
+getVarCov(M.3_final, individual = "6", type = "marginal")
+```
+
+### Variance-covariance for child with id 1
+
+\begin{enumerate}
+\item Note, first that the estimated marginal varinces of the VSAE scores increases dramatically with age (as noted in the EDA)
+\item The mariginal covariances associated with age 2 is 0 [in the first row and first column]
+\item This is due to exclusion of the random intercept from the model, and to using Age-2 as a covariate instead of age
+\item Note the values of the first row of the $\mathbf{Z}_i$ matrix correspond to the values of Age - 2 $(x_{1ij})$ and $(Age-2)^2 = x_{2ij}$
+\item The $Z_i$ matrix can be written as follows:
+\[\mathbf{Z}_{i} = \begin{pmatrix}
+0 & 0\\
+1 & 1\\
+3 & 9\\
+7 & 49\\
+11 & 121
+\end{pmatrix}\]
+
+\item Also note that since there is no intercept in the final model, variance in VSAE score at age 2 is due to residual variance, contributed by $\mathbf{R}_i = \sigma^2 \mathbf{I}_{n_i}$
+\end{enumerate}

@@ -1,0 +1,197 @@
+---
+title: "HW9_Longitudinal_Data_Analysis_Cody_York"
+output: html_notebook
+---
+
+Libraries and Data Import
+```{r}
+library(nlme)
+library(ggplot2)
+library(tidyverse)
+library(lcsm)
+
+setwd("C:\\Users\\cy_su\\DataspellProjects\\DSCI_610_Data_Analytics_for_Health_Sciences\\Week_14")
+
+teen_alcohol <- read.csv("teen_alcohol.txt", header = TRUE)
+head(teen_alcohol)
+```
+
+Remove unnecessary column and create a new column needed for the model. Also take a summary of the dataset:
+```{r}
+teen_alcohol <- subset(teen_alcohol, select = -ccoa)
+
+teen_alcohol$age_14_squared <- teen_alcohol$age_14^2
+
+summary(teen_alcohol)
+```
+
+
+# Summarise the data for age:
+```{r}
+summary(factor(teen_alcohol$age))
+```
+
+# Next we will create a summary of child of alcoholic with each age level:
+```{r}
+table(factor(teen_alcohol$coa), factor(teen_alcohol$age))
+```
+
+# Descriptive stats for alcohol use among the teens in the data:
+```{r}
+summary(teen_alcohol$alcuse)
+```
+
+```{r}
+tapply(teen_alcohol$alcuse, factor(teen_alcohol$age), summary, na.rm = TRUE)
+```
+
+# Plot a summary of the data. This box plot is looking at alcohol use by age and child of an alcoholic:
+```{r}
+ggplot(data = teen_alcohol, mapping = aes(x = factor(age), y = alcuse)) +
+  geom_boxplot() +
+  facet_wrap(~factor(coa), nrow = 1)
+```
+
+# Mean Alcohol Use by Child of Alcoholic and Age:
+```{r}
+teen_alcohol %>%
+  mutate(coa = factor(coa)) %>%
+  mutate(age = factor(age)) %>%
+  group_by(coa, age) %>%
+  summarize(avg_alcuse = mean(alcuse)) %>%
+  ggplot() +
+  geom_point(aes(y = avg_alcuse, x = age, col = coa))
+
+```
+We can see that alcohol use increases by age and if they were a child of an alcoholic.
+
+# Individual Teen Trajectory of Alcohol Use by Age
+```{r}
+teen_alcohol_1 <- filter(teen_alcohol, coa == 0)
+teen_alcohol_2 <- filter(teen_alcohol, coa == 1)
+df_W1 <- teen_alcohol_1 %>% pivot_wider(names_from = age, values_from = alcuse)
+colnames(df_W1) <- c("id", "coa", "male?", "age_14", "peer", "cpeer", "ccoa", "age14", "age15", "age16")
+
+df_tr <- select(df_W1, id, age14, age15, age16)
+x_var_list <- c("age14", "age15", "age16")
+plot_trajectories(data = df_tr,
+                  id_var = "id",
+                  var_list = x_var_list,
+                  xlab = "Age", ylab = "Alcohol Use",
+                  connect_missing = FALSE,
+                  title_n = "Not a Child of An Alcoholic")
+
+df_W2 <- teen_alcohol_2 %>% pivot_wider(names_from = age, values_from = alcuse)
+colnames(df_W2) <- c("id", "coa", "male?", "age_14", "peer", "cpeer", "ccoa", "age14", "age15", "age16")
+
+df_tr_2 <- select(df_W2, id, age14, age15, age16)
+x_var_list_2 <- c("age14", "age15", "age16")
+plot_trajectories(data = df_tr_2,
+                  id_var = "id",
+                  var_list = x_var_list_2,
+                  xlab = "Age", ylab = "Alcohol Use",
+                  connect_missing = FALSE,
+                  title_n = "A Child of An Alcoholic")
+
+```
+
+It looks like from the above graph that if a teen is not a child of an alcoholic they are more likely to pick up heavier alcohol use as they age.
+However, if the teen is a child of an alcoholic it seems that their alcohol use actually goes down as they age.
+In both cases, there are children who never use alcohol and for children of no alcoholic parents they are more likely to begin and for teens of alcoholic parents they are more likely to quit.
+
+# Create Factors for COA
+```{r}
+teen_alcohol$coaF[teen_alcohol$coa == 0] <- 0
+teen_alcohol$coaF[teen_alcohol$coa == 1] <- 1
+teen_alcohol$coaF <- factor(teen_alcohol$coaF)
+
+teen_alcohol_factored <- teen_alcohol[complete.cases(teen_alcohol),]
+
+```
+
+# Fit a Random Coefficient Model:
+```{r}
+M.1_fit <- lme(alcuse ~ age_14 +
+  age_14_squared +
+  coa +
+  male +
+  cpeer +
+  age_14:coaF +
+  age_14_squared:coaF, random = ~age_14 + age_14_squared | id, data = teen_alcohol)
+
+summary(M.1_fit)
+
+M.1_No_SQ_Fit <- lme(alcuse ~ age_14 +
+  age_14_squared +
+  coa +
+  male +
+  cpeer +
+  age_14:coaF +
+  age_14_squared:coaF, random = ~age_14 | id, data = teen_alcohol)
+
+summary(M.1_No_SQ_Fit)
+```
+
+# Perform a test to determine which model to move forward with
+```{r}
+anova(M.1_fit, M.1_No_SQ_Fit)
+```
+
+Since the pvalue is above 0 we will remove the Quadratic Equation.
+
+# Test on the Fixed Effects
+```{r}
+M.2_Fit <- lme(alcuse ~ age_14 +
+  age_14_squared +
+  coa +
+  male +
+  cpeer +
+  age_14:coaF +
+  age_14_squared:coaF, random = ~age_14 | id, method = "ML", data = teen_alcohol)
+
+M.3_Fit <- lme(alcuse ~ age_14 +
+  age_14_squared +
+  coa +
+  male +
+  cpeer +
+  age_14:coaF, random = ~age_14 | id, method = "ML", data = teen_alcohol)
+
+anova(M.3_Fit, M.2_Fit)
+```
+We will drop the interaction with the quadratic equation
+```{r}
+M.4_Fit <- lme(alcuse ~ age_14 + age_14_squared + coa + male + cpeer, random = ~age_14 | id, method = "ML", data = teen_alcohol)
+
+anova(M.4_Fit, M.3_Fit)
+```
+We will also omit the interaction with the linear interaction.
+```{r}
+M.5_Fit <- lme(alcuse ~ age_14 + age_14_squared + coa + male, random = ~age_14 | id, method = "ML", data = teen_alcohol)
+
+anova(M.5_Fit, M.4_Fit)
+```
+We will not omit the cpeer form the model.
+```{r}
+M.6_Fit <- lme(alcuse ~ age_14 + age_14_squared + coa + cpeer, random = ~age_14 | id, method = "ML", data = teen_alcohol)
+
+anova(M.6_Fit, M.4_Fit)
+```
+We can omit the Male? from the model.
+```{r}
+M.7_Fit <- lme(alcuse ~ age_14 + age_14_squared + cpeer, random = ~age_14 | id, method = "ML", data = teen_alcohol)
+
+anova(M.7_Fit, M.6_Fit)
+```
+We cannot omit the coa.
+
+# Final Model Analysis
+```{r}
+M.8_Final <- lme(alcuse ~ age_14 + age_14_squared + coa + cpeer, random = ~age_14 | id, method = "REML", data = teen_alcohol)
+summary(M.8_Final)
+anova(M.8_Final)
+```
+
+The Intercept βˆ0 = 0.37 represents the estimated mean Alcohol Use Score for the teens aged 14 in the reference of whether they are children of alcoholics.
+The Parameter βˆ1 = 0.4 this is both positive and significant and this means that age increases the use of alcohol.
+The Parameter βˆ3 = 0.57 this is both positive and significant and this means that being a child of an alcoholic increases the chance of alcohol use.
+The Parameter βˆ4 = 0.61 this is both positive and significant and this means that having peers that use alcohol increases the chance of alcohol use.
