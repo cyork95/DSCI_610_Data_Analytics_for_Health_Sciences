@@ -1,0 +1,141 @@
+---
+title: "Classification of Parkinson’s disease using Jitter Frequency and Speech Measurements"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{css, echo=FALSE}
+h1, h4 ,h5 {
+  text-align: center;
+}
+```
+
+##### Sean Groves and Cody York
+
+
+
+#### Abstract
+|               Insert stuff about the abstract and blah blah blah xxxxxxxxxxxxxxxxxxxxxx
+|               blah blah xxxxx 
+
+
+## Introduction
+
+Parkinson's Disease is a neurological disorder effecting more than 6 million people worldwide that impacts individuals motor skills, speech and cognitive abilities.[1] There are currently no tests that are able to use biomarkers to accurately identify and diagnose Parkinson's Disease (PD). Therefore, diagnosis of PD is reliant on clinical observation of the symptoms of PD. Relying on the presence of these symptoms prevents early diagnosis, and costs the effected individuals valuable time in getting treatment to slow the progression of the disease. One option to improve the early diagnosis of PD is to use speech data, which had been found to be one of the earliest detectable PD symptoms.[1] Using the biomedical voice measurements data from [2], we will attempt to use various data analytics methods to classify potential PD cases.
+
+## Objectives 
+
+* Identify which explanatory variables are most significant to explaining Parkinson's disease status
+* Build a Logistic Regression and a Random Forest Classification model to classify Parkinson's disease status
+* Compare the models to find which is best at classifying Parkinson's disease status
+
+## Analysis Plan
+
+### Exploratory Data Analysis
+
+### Data Analytics Methods
+
+### Data Summary
+
+## Data Analysis and Results
+
+### Analysis 1
+
+### Analysis 2 
+
+## Discussion
+
+## Conclusion
+
+## References
+
+* _[1]_: Zhang, H.-H., Yang, L., Liu, Y., Wang, P., Yin, J., Li, Y., Qiu, M., Zhu, X., &amp; Yan, F. (2016, November 16). Classification of parkinson's disease utilizing multi-edit nearest-neighbor and ensemble learning algorithms with speech samples. PubMed Central. Retrieved April 30, 2023, from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5112697/ 
+* _[2]_: 'Exploiting Nonlinear Recurrence and Fractal Scaling Properties for Voice Disorder Detection', 
+Little MA, McSharry PE, Roberts SJ, Costello DAE, Moroz IM. BioMedical Engineering OnLine 2007, 6:23 (26 June 2007)
+https://archive.ics.uci.edu/ml/machine-learning-databases/parkinsons/
+* _[3]_:
+
+## Appendix
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(MASS)
+library(tree)
+library(randomForest)
+library(psych)
+
+setwd("C:\\Users\\cy_su\\DataspellProjects\\DSCI_610_Data_Analytics_for_Health_Sciences\\Final_Project")
+```
+```{r}
+parkinsons_data <- read.csv('parkinsons.data')
+
+
+parkinsons_data_less_fields <- subset(parkinsons_data, select = c(name, MDVP.Fo.Hz., MDVP.Jitter..., Jitter.DDP, MDVP.RAP, MDVP.PPQ, MDVP.Shimmer,
+                                                               MDVP.APQ, Shimmer.DDA, HNR, status))
+
+#ddp is the measure of the average absolute difference between jitter cycles
+#Relative amplitude perturbation (RAP) is a measure of the variability of the amplitude of a voice signal
+#Five-point period perturbation quotient (PPQ) is a measure of the variability of the fundamental frequency (F0) of a voice signal
+#rap and ppq are used to objectively measure vocal quality of voice
+#shimmer is a measure of the variability of the amplitude of a voice signal.
+#MDVP 11-point amplitude perturbation quotient (APQ) is a measure of the variability of the amplitude of a voice signal. A high APQ11 value indicates that the amplitude of the voice signal is variable, which can be a sign of vocal pathology. For example, people with vocal nodules or polyps often have a high APQ11 value.
+#dda of shimmer is the measure of the average absolute differences between the amplitudes of consecutive periods
+#hnr is the ration of harmonics to noise
+#status whether or not they have Parkinsons disese
+
+colnames(parkinsons_data_less_fields) <- c("id", "avg_vocal_freq", "percent_measure_of_jitter", "ddp_measure_of_jitter",
+                                           "rap_measure_of_vocals", "ppq_measure_of_vocals", "measure_of_shimmer",
+                                           "apq_measure_of_shimmer", "dda_measure_of_shimmer", "hnr", "status")
+head(parkinsons_data_less_fields)
+describe(parkinsons_data_less_fields)
+```
+```{r}
+set.seed(123)
+
+train_index <- sample(nrow(parkinsons_data_less_fields), nrow(parkinsons_data_less_fields) * 0.7)
+
+predict_parkinsons.train <- parkinsons_data_less_fields[train_index, ]
+head(predict_parkinsons.train)
+nrow(predict_parkinsons.train)
+
+predict_parkinsons.test <- parkinsons_data_less_fields[-train_index, ]
+head(predict_parkinsons.test)
+nrow(predict_parkinsons.test)
+```
+```{r}
+lm.parkinsons.tr <- glm(status ~ avg_vocal_freq + percent_measure_of_jitter + ddp_measure_of_jitter +
+                                rap_measure_of_vocals + ppq_measure_of_vocals + measure_of_shimmer +
+                                apq_measure_of_shimmer + dda_measure_of_shimmer + hnr,
+                        family = "binomial",
+                        data = predict_parkinsons.train)
+lm_test_error <- mean((predict_parkinsons.test$status - predict(lm.parkinsons.tr, predict_parkinsons.test))^2)
+paste("The value of the logistic test error is:", lm_test_error)
+```
+```{r}
+tree.parkinsons.tr <- tree(status ~ avg_vocal_freq + percent_measure_of_jitter + ddp_measure_of_jitter +
+                            rap_measure_of_vocals + ppq_measure_of_vocals + measure_of_shimmer +
+                            apq_measure_of_shimmer + dda_measure_of_shimmer + hnr, data = predict_parkinsons.train)
+plot(tree.parkinsons.tr)
+text(tree.parkinsons.tr, pretty = 0)
+
+
+yhat <- predict(tree.parkinsons.tr, newdata = predict_parkinsons.test)
+tree_test_error <- mean((yhat - predict_parkinsons.test$status)^2)
+paste("The error from the tree regression is: ", tree_test_error)
+paste("This tree model is less accurate than the logistic model by:", abs(lm_test_error - tree_test_error))
+```
+```{r}
+rf.parkinsons <- randomForest(status ~ avg_vocal_freq + percent_measure_of_jitter + ddp_measure_of_jitter +
+                                rap_measure_of_vocals + ppq_measure_of_vocals + measure_of_shimmer +
+                                apq_measure_of_shimmer + dda_measure_of_shimmer + hnr, data = predict_parkinsons.train)
+rf.parkinsons
+
+yhat.rf.parkinsons <- predict(rf.parkinsons, newdata = predict_parkinsons.test)
+forest_test_error <- mean((yhat.rf.parkinsons - predict_parkinsons.test$status)^2)
+paste("The error from the forest regression is: ", forest_test_error)
+paste("This new model is more accurate than the tree model by:", tree_test_error - forest_test_error)
+paste("This new model is more accurate than the regreession model by:", lm_test_error - forest_test_error)
+```

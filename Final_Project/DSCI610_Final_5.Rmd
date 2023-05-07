@@ -1,0 +1,359 @@
+---
+title: "Classification of Parkinson’s disease using Jitter Frequency and Speech Measurements"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r global-options, warning=FALSE, message=FALSE, include=FALSE}
+knitr::opts_chunk$set(warning=FALSE, message=FALSE)
+```
+
+```{css, echo=FALSE}
+h1, h4 ,h5 {
+  text-align: center;
+}
+```
+
+##### Sean Groves and Cody York
+
+
+
+#### Abstract
+|                   Parkinson's disease (PD) is a progressive neurological disorder that affects movement. Symptoms of
+|               PD can include tremor, slowness of movement, stiffness, and impaired balance. There is currently no cure
+|               for PD, but early diagnosis and treatment can help to improve quality of life. Machine learning (ML)
+|               models can be used to help with the early detection of PD. ML models are trained on data sets that
+|               include information about people with PD and people without PD. The models can then be used to predict
+|               whether a person is likely to have PD.
+|                   In this study, we used four ML models to predict PD: logistic regression, decision tree,
+|               random forest, and support vector machine. The data set we used included vocal, shimmer, and jitter data
+|               on people with PD and those without. The data set had 23 attributes across 197 instances.
+|               We used feature selection to determine the best fields for our models. Feature selection is a process
+|               of identifying the most important features in a data set. This helps to improve the accuracy of the ML models.
+|                   The results of our study showed that the ML models were able to predict PD with a high degree of
+|               accuracy. The random forest model had the highest accuracy, followed by the support vector machine model,
+|               the decision tree model, and the logistic regression model. These results suggest that ML models can be
+|               used to help with the early detection of PD. Further research is needed to validate these results and
+|               to develop ML models that can be used in clinical practice.
+
+
+## Introduction
+
+Parkinson's Disease is a neurological disorder effecting more than 6 million people worldwide that impacts individuals motor skills, speech and cognitive abilities.[1] There are currently no tests that are able to use biomarkers to accurately identify and diagnose Parkinson's Disease (PD). Therefore, diagnosis of PD is reliant on clinical observation of the symptoms of PD. Relying on the presence of these symptoms prevents early diagnosis, and costs the effected individuals valuable time in getting treatment to slow the progression of the disease. One option to improve the early diagnosis of PD is to use speech data, which had been found to be one of the earliest detectable PD symptoms.[1] Using the biomedical voice measurements data from [2], we will attempt to use various data analytics methods to classify potential PD cases.
+
+## Objectives 
+
+* Identify which explanatory variables are most significant to explaining Parkinson's disease status
+* Build a Logistic Regression and a Random Forest Classification model to classify Parkinson's disease status
+* Compare the models to find which is best at classifying Parkinson's disease status
+
+## Analysis Plan
+
+### Exploratory Data Analysis
+Exploring this dataset was accomplished mainly through thorough research of the various features to see what they mean
+and how they can be used. This gave us a lot of insight into the data as at first we were unsure where to begin with feature selection.
+We also did basic statistics on the fields to ensure that there weren't outliers and that the data was clean and complete.
+
+### Data Analytics Methods
+**Data Preprocessing** was the first step to complete after the exploratory analysis. The datas we used was already very clean
+and thorough. The preprocessing we did included using the **findCorrelation()** from the **caret package** to select the best features
+for our analysis. These are the features in the dataset that are the most correlated meaning they would be the most likely to help
+our analysis. After doing the feature selection, we compared the results to the previous run and determined that the feature
+selection greatly improved the accuracy of our models.
+
+After using the feature selection we then split the data into a training and a testing set of data. We did 70% for training
+and the remaining 30% were used for testing. This meant we ended up with 136 records for training and 59 records for testing.
+
+The machine learning models we considered for this analysis were **Logistic Regression**, **Decision Tree**, **Random Forest**,
+and **Support Vector Machines**. These models are first trained on the training data and then tested against the testing
+data after the model has been trained. The results that the model gives are then compared to the expected results (whether
+someone has Parkinson's disease) and rate of miscalculation and confusion matrix are then created. The **rate of miscalculation**
+is created by subtracting the mean of the amount of correct observations from 1. This gives us a percentage of the time
+the model. To create the **confusion matrix** we use the R built-in **table()** method to create a table of the amount of
+observations that have Parkinson's and those that do not for both the testing dataset and the predictions the model
+gives us.
+
+### Data Summary
+The dataset we have used for this analysis came form the **UCI Machine Learning Repository** and is referred to as the "Parkinsons Data Set".
+This dataset was created by Max Little of the University of Oxford in collaboration with the National Centre for Voice
+and Speech in Denver Colorado. This dataset contains 31 voice recordings of people with Parkinson's disease (PD) and 31
+healthy controls. The recordings are in CSV format and each row corresponds to one recording. The main aim of the dataset
+is to discriminate between PD and healthy controls. [3] This dataset contained 23 attributes across 197 instances.
+
+The features from the dataset we will be looking at include: MDVP.Fhi(Hz), MDVP:Flo(Hz), NHR, RPDE, DFA, spread2 and status.
+
+**MDVP.Fhi(Hz)** is the maximum vocal fundamental frequency in Hertz and **MDVP:Flo(Hz)** is the minimum vocal fundamental frequency in Hertz.
+This is calculated using the **Kay Pentax Multidimensional Voice Program (MDVP)**. The fundamental frequency is the lowest
+frequency of vibration in a sound wave and is what determines the pitch of the sound. [5]
+
+[Statistics or Graph]
+
+**NHR** stands for Noise-to-Harmonic Ratio, and it is  calculated by dividing the energy of the tonal components in the voice
+by the energy of the noise components. It is a useful measure for assessing vocal health and can be used to identify changes
+in vocal quality that may be associated with conditions such as vocal cord nodules, vocal cord paralysis, and Parkinson's disease. [4]
+
+[Statistics or Graph]
+
+**RPDE** stands for Rescaled Phase Dependent Entropy. It is a measure of the complexity of a time series that is based on
+the distribution of the phases of the constituent frequencies. It is a useful measures for assessing the complexity of a
+time series. They can be used to identify changes in the complexity of a time series that may be associated with changes
+in the underlying system. For example, RPDE has been used to study the changes in the complexity of the voice that are
+associated with Parkinson's disease. [3]
+
+[Statistics or Graph]
+
+**DFA** stands forDetrended fluctuation analysis (DFA) is a measure of the similarity of noise in speech signals. It is
+used to identify voice disorders by measuring the scaling exponent of the noise. A higher scaling exponent indicates a
+more disordered signal, which is associated with voice disorders. [3]
+
+[Statistics or Graph]
+
+**spread2** is a measure of the unevenness of the distribution of fundamental frequencies in a voice signal. It is
+calculated as the standard deviation of the fundamental frequencies in the signal. A higher spread2 value indicates a
+more variable fundamental frequency, which is associated with voice disorders. [6]
+
+[Statistics or Graph]
+
+**status** is a binary attribute that sua whether the person has Parkinson's (1) or does not have Parkinson's (0).
+
+[Statistics or Graph]
+
+## Data Analysis and Results
+
+### Analysis 1
+
+### Analysis 2 
+
+## Discussion
+
+## Conclusion
+
+## References
+
+* _[1]_: Zhang, H.-H., Yang, L., Liu, Y., Wang, P., Yin, J., Li, Y., Qiu, M., Zhu, X., &amp; Yan, F. (2016, November 16). Classification of parkinson's disease utilizing multi-edit nearest-neighbor and ensemble learning algorithms with speech samples. PubMed Central. Retrieved April 30, 2023, from https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5112697/ 
+* _[2]_: 'Exploiting Nonlinear Recurrence and Fractal Scaling Properties for Voice Disorder Detection', 
+Little MA, McSharry PE, Roberts SJ, Costello DAE, Moroz IM. BioMedical Engineering OnLine 2007, 6:23 (26 June 2007)
+https://archive.ics.uci.edu/ml/machine-learning-databases/parkinsons/
+* _[3]_: Max A. Little, Patrick E. McSharry, Eric J. Hunter, Lorraine O. Ramig (2008), 'Suitability of dysphonia measurements for telemonitoring of Parkinson's disease', IEEE Transactions on Biomedical Engineering (to appear).
+* _[4]_: Little, Max A. (2019). "A Tutorial on Voice Analysis in R". RPubs. Retrieved from https://rstudio-pubs-static.s3.amazonaws.com/197257_4ecb7314bc1f4619b59ab44a1374ce7f.html
+* _[5]_: Wu Y, Chen P, Yao Y, Ye X, Xiao Y, Liao L, Wu M, Chen J. Dysphonic Voice Pattern Analysis of Patients in Parkinson's Disease Using Minimum Interclass Probability Risk Feature Selection and Bagging Ensemble Learning Methods. Comput Math Methods Med. 2017;2017:4201984. doi: 10.1155/2017/4201984. Epub 2017 May 3. PMID: 28553366; PMCID: PMC5434464.
+* _[6]_: Vance, Matt. (2019). "A Tutorial on Voice Analysis in R". RPubs. Retrieved from https://rpubs.com/VanceMatt/197257
+
+## Appendix
+### R Code Used
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(MASS)
+library(tree)
+library(randomForest)
+library(psych)
+library(caret)
+library(kernlab)
+library(e1071)
+
+
+
+
+```
+
+```{r}
+parkinsons_data <- read.csv('parkinsons.data')
+
+
+parkinsons_data_less_fields <- subset(parkinsons_data, select = c(name, MDVP.Fo.Hz., MDVP.Jitter..., Jitter.DDP, MDVP.RAP, MDVP.PPQ, MDVP.Shimmer,
+                                                               MDVP.APQ, Shimmer.DDA, HNR, status))
+
+#ddp is the measure of the average absolute difference between jitter cycles
+#Relative amplitude perturbation (RAP) is a measure of the variability of the amplitude of a voice signal
+#Five-point period perturbation quotient (PPQ) is a measure of the variability of the fundamental frequency (F0) of a voice signal
+#rap and ppq are used to objectively measure vocal quality of voice
+#shimmer is a measure of the variability of the amplitude of a voice signal.
+#MDVP 11-point amplitude perturbation quotient (APQ) is a measure of the variability of the amplitude of a voice signal. A high APQ11 value indicates that the amplitude of the voice signal is variable, which can be a sign of vocal pathology. For example, people with vocal nodules or polyps often have a high APQ11 value.
+#dda of shimmer is the measure of the average absolute differences between the amplitudes of consecutive periods
+#hnr is the ration of harmonics to noise
+#status whether or not they have Parkinsons disese
+
+colnames(parkinsons_data_less_fields) <- c("id", "avg_vocal_freq", "percent_measure_of_jitter", "ddp_measure_of_jitter",
+                                           "rap_measure_of_vocals", "ppq_measure_of_vocals", "measure_of_shimmer",
+                                           "apq_measure_of_shimmer", "dda_measure_of_shimmer", "hnr", "status")
+head(parkinsons_data_less_fields)
+describe(parkinsons_data_less_fields)
+```
+
+```{r}
+set.seed(123)
+
+train_index <- sample(nrow(parkinsons_data_less_fields), nrow(parkinsons_data_less_fields) * 0.7)
+
+predict_parkinsons.train <- parkinsons_data_less_fields[train_index, ]
+head(predict_parkinsons.train)
+nrow(predict_parkinsons.train)
+
+predict_parkinsons.test <- parkinsons_data_less_fields[-train_index, ]
+head(predict_parkinsons.test)
+nrow(predict_parkinsons.test)
+```
+
+```{r}
+# lm.parkinsons.tr <- lm(status ~ avg_vocal_freq + percent_measure_of_jitter + ddp_measure_of_jitter +
+#                                 rap_measure_of_vocals + ppq_measure_of_vocals + measure_of_shimmer +
+#                                 apq_measure_of_shimmer + dda_measure_of_shimmer + hnr, data = predict_parkinsons.train)
+# lm_test_error <- mean((predict_parkinsons.test$status - predict(lm.parkinsons.tr, predict_parkinsons.test))^2)
+# paste("The value of the logistic test error is:", lm_test_error)
+
+# logistic regression
+glm.parkinsons.tr <- glm(status ~ avg_vocal_freq + percent_measure_of_jitter + ddp_measure_of_jitter +
+                         rap_measure_of_vocals + ppq_measure_of_vocals + measure_of_shimmer +
+                         apq_measure_of_shimmer + dda_measure_of_shimmer + hnr, family = binomial ,data = predict_parkinsons.train)
+glm.parkinsons.tr
+
+
+# glm_test_error <- mean((predict_parkinsons.test$status - predict(glm.parkinsons.tr, predict_parkinsons.test))^2)
+# paste("The value of the logistic test error is:", glm_test_error)
+
+glm.probs <- predict(glm.parkinsons.tr,predict_parkinsons.test, type = 'response' )
+glm.pred=rep(0,nrow(predict_parkinsons.test))
+glm.pred[glm.probs >.5]=1
+
+table(glm.pred, predict_parkinsons.test$status)
+# rate of misclassification
+glm_error_rate<- (1-mean(glm.pred==predict_parkinsons.test$status))
+paste("The logistic missclasification rate is:", glm_error_rate)
+```
+
+
+```{r}
+tree.parkinsons.tr <- tree(as.factor(status) ~ avg_vocal_freq + percent_measure_of_jitter + ddp_measure_of_jitter +
+                            rap_measure_of_vocals + ppq_measure_of_vocals + measure_of_shimmer +
+                            apq_measure_of_shimmer + dda_measure_of_shimmer + hnr, data = predict_parkinsons.train)
+plot(tree.parkinsons.tr)
+text(tree.parkinsons.tr, pretty = 0)
+
+# yhat <- predict(tree.parkinsons.tr, newdata = predict_parkinsons.test)
+# tree_test_error <- mean((yhat - predict_parkinsons.test$status)^2)
+# paste("The error from the tree regression is: ", tree_test_error)
+# paste("This tree model is less accurate than the logistic model by:", abs(lm_test_error - tree_test_error))
+
+tree.pred <- predict(tree.parkinsons.tr,predict_parkinsons.test, type = 'class')
+table(tree.pred,predict_parkinsons.test$status)
+# rate of misclassification
+tree_error_rate<- (1-mean(tree.pred==predict_parkinsons.test$status))
+paste("The regression tree  missclasification rate is:", tree_error_rate)
+paste("The regression tree  missclasification rate is lower than the logistic model missclasification rate by:", abs(glm_error_rate-tree_error_rate))
+```
+
+```{r}
+rf.parkinsons <- randomForest(as.factor(status) ~ avg_vocal_freq + percent_measure_of_jitter + ddp_measure_of_jitter +
+                                rap_measure_of_vocals + ppq_measure_of_vocals + measure_of_shimmer +
+                                apq_measure_of_shimmer + dda_measure_of_shimmer + hnr, data = predict_parkinsons.train, mtry=3, importance=TRUE)
+rf.parkinsons
+
+
+# yhat.rf.parkinsons <- predict(rf.parkinsons, newdata = predict_parkinsons.test)
+# forest_test_error <- mean((yhat.rf.parkinsons - predict_parkinsons.test$status)^2)
+# paste("The error from the forest regression is: ", forest_test_error)
+# paste("This new model is more accurate than the tree model by:", tree_test_error - forest_test_error)
+# paste("This new model is more accurate than the regreession model by:", lm_test_error - forest_test_error)
+paste("The random forest tree  missclasification rate is:", rf.parkinsons$err.rate[500,1])
+paste("The random forest tree  missclasification rate is lower than the logistic model missclasification rate by:", glm_error_rate-(rf.parkinsons$err.rate[500,1]))
+paste("The random forest tree  missclasification rate is lower than the regression tree missclasification rate by:", tree_error_rate-(rf.parkinsons$err.rate[500,1]))
+
+```
+
+## R Codes using correlation to select features 
+
+```{r}
+#library(caret)
+#################################################### using selected features
+test_Park <- parkinsons_data %>%
+  mutate(parkinson = status)%>%
+  dplyr::select(-c(name,status))
+
+######## find highly correlated features 
+cor_matrix2 <-cor(test_Park[,1:22])
+findCorrelation(cor_matrix2, cutoff=0.5)
+
+#keep only non-highly correlated features
+#MDVP.Fhi.Hz , MDVP.Flo.Hz.,  NHR , RPDE, DFA , spread2, parkinson(status)
+park_subset<-test_Park[,c(2,3,15,17,18,20,23)]
+
+sub_train <- sample(nrow(park_subset), nrow(park_subset) * 0.7)
+
+predict_sub_parkinsons.train <- park_subset[sub_train, ]
+
+
+predict_sub_parkinsons.test <- park_subset[-sub_train, ]
+
+
+
+# glm
+glm.park2 <- glm(parkinson ~ ., family = binomial ,data = predict_sub_parkinsons.train)
+glm.park2
+
+glm.probs2 <- predict(glm.park2,predict_sub_parkinsons.test, type = 'response' )
+glm.pred2=rep(0,nrow(predict_sub_parkinsons.test))
+glm.pred2[glm.probs2 >.5]=1
+
+table(glm.pred2, predict_sub_parkinsons.test$parkinson)
+# rate of misclassification
+
+sub_glm_error_rate<- 1-mean(glm.pred2==predict_sub_parkinsons.test$parkinson)
+paste("The logistic missclasification rate is:", sub_glm_error_rate)
+
+
+# regression tree
+
+sub_park_tree <- tree(as.factor(parkinson) ~., data = predict_sub_parkinsons.train)
+plot(sub_park_tree)
+text(sub_park_tree, pretty = 0)
+
+
+sub_tree.pred <- predict(sub_park_tree,predict_sub_parkinsons.test, type = 'class')
+table(sub_tree.pred,predict_sub_parkinsons.test$parkinson)
+# rate of misclassification
+sub_tree_error_rate<- (1-mean(sub_tree.pred==predict_sub_parkinsons.test$parkinson))
+paste("The regression tree  missclasification rate is:", sub_tree_error_rate)
+
+
+## RF tree
+
+sub_rf.parkinsons <- randomForest(as.factor(parkinson) ~ ., data = predict_sub_parkinsons.train, mtry=3, importance=TRUE)
+sub_rf.parkinsons
+varImpPlot(sub_rf.parkinsons)
+
+paste("The random forest tree  missclasification rate is:", sub_rf.parkinsons$err.rate[500,1])
+paste("The random forest tree  missclasification rate is lower than the logistic model missclasification rate by:", sub_glm_error_rate-(sub_rf.parkinsons$err.rate[500,1]))
+paste("The random forest tree  missclasification rate is lower than the regression tree missclasification rate by:", sub_tree_error_rate-(sub_rf.parkinsons$err.rate[500,1]))
+
+
+### SVM
+sub_tune.out <- tune(svm, as.factor(parkinson) ~., data=predict_sub_parkinsons.train, kernel ="radial",
+                 ranges =list(cost=c(0.1 ,1 ,10 ,100 ,1000),
+                              gamma=c(0.5,1,2,3,4) ))
+summary(sub_tune.out)
+
+
+svm.parkinsons_sub <- svm(as.factor(parkinson) ~ .,
+                      data = predict_sub_parkinsons.train,
+                      kernel = "radial",
+                      gamma = 0.5,
+                      cost = 100)
+
+svm.parkinsons.predictions_sub <- predict(svm.parkinsons_sub, predict_sub_parkinsons.test)
+summary(svm.parkinsons.predictions_sub)
+
+table(predict_sub_parkinsons.test$parkinson, svm.parkinsons.predictions_sub)
+
+svm_error_rate<- (1-mean(svm.parkinsons.predictions_sub==predict_sub_parkinsons.test$parkinson))
+paste("The svm  missclasification rate is:", svm_error_rate)
+
+paste("The svm  missclasification rate is lower than the logistic model missclasification rate by:", sub_glm_error_rate-svm_error_rate)
+paste("The svm  missclasification rate is lower than the regression tree missclasification rate by:", sub_tree_error_rate-svm_error_rate)
+paste("The svm  missclasification rate is lower than the random forest tree missclasification rate by:", (sub_rf.parkinsons$err.rate[500,1])-svm_error_rate)
+
+```
+
